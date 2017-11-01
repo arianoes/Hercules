@@ -589,9 +589,9 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     // Define coordinates vector for interpolation --------------------------------------------------------------------------------------------------------
     payload->Vp=CVMResult[0];
     payload->Vs=CVMResult[1];
-    payload->Ro=CVMResult[2]*1000; // density in kg/m3
+    payload->rho=CVMResult[2]*1000; // density in kg/m3
     //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],CVMResult[0],CVMResult[1],CVMResult[2]);
-    printf("%lf %lf %lf\n", payload->Vp,payload->Vs,payload->Ro);
+    //printf("%lf %lf %lf\n", payload->Vp,payload->Vs,payload->Ro);
     free(CVMResult);
     return 0;
 }
