@@ -478,7 +478,7 @@ static void read_parameters( int argc, char** argv ){
     MPI_Bcast (Param.parameters_input_file,  256, MPI_CHAR, 0, comm_solver);
     MPI_Bcast (Param.theCheckPointingDirOut, 256, MPI_CHAR, 0, comm_solver);
     MPI_Bcast (Param.FourDOutFile,           256, MPI_CHAR, 0, comm_solver);
-    MPI_Bcast (Param.cvmdb_input_file,       256, MPI_CHAR, 0, comm_solver);
+   //MPI_Bcast (Param.cvmdb_input_file,       256, MPI_CHAR, 0, comm_solver);
     MPI_Bcast (Param.mesh_etree_output_file, 256, MPI_CHAR, 0, comm_solver);
     MPI_Bcast (Param.planes_input_file,      256, MPI_CHAR, 0, comm_solver);
 
@@ -767,7 +767,7 @@ static int32_t parse_parameters( const char* numericalin )
         (parsetext(fp, "checkpointing_rate",             'i', &checkpointing_rate          ) != 0) ||
         (parsetext(fp, "checkpoint_path",                's', &checkpoint_path             ) != 0) ||
         (parsetext(fp, "4D_output_file",                 's', &Param.FourDOutFile          ) != 0) ||
-        (parsetext(fp, "cvmdb_input_file",               's', &Param.cvmdb_input_file      ) != 0) ||
+        //(parsetext(fp, "cvmdb_input_file",               's', &Param.cvmdb_input_file      ) != 0) ||
         (parsetext(fp, "mesh_etree_output_file",         's', &Param.mesh_etree_output_file) != 0) ||
         (parsetext(fp, "planes_input_file",              's', &Param.planes_input_file     ) != 0) ||
         (parsetext(fp, "include_nonlinear_analysis",     's', &include_nonlinear_analysis  ) != 0) ||
@@ -2223,7 +2223,7 @@ mesh_generate()
 
 #ifdef USECVMDB
     /* Close the material database */
-    etree_close(Global.theCVMEp);
+    //etree_close(Global.theCVMEp);
 #else
     free(Global.theCVMRecord);
 #endif /* USECVMDB */
@@ -7686,7 +7686,7 @@ int main( int argc, char** argv )
     read_parameters(argc, argv);
 
     /* Create and open database */
-    open_cvmdb();
+    //open_cvmdb();
 
     /* Initialize nonlinear parameters */
     if ( Param.includeNonlinearAnalysis == YES ) {
