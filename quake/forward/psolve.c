@@ -58,6 +58,7 @@
 #include "drm.h"
 #include "meshformatlab.h"
 #include "topography.h"
+#include "CVMBogotaLibraryHercules.h"
 
 /* ONLY GLOBAL VARIABLES ALLOWED OUTSIDE OF PARAM. and GLOBAL. IN ALL OF PSOLVE!! */
 MPI_Comm comm_solver;
@@ -1400,7 +1401,7 @@ setrec( octant_t* leaf, double ticksize, void* data )
                     z_m -= get_surface_shift();
 		}
 
-		res = cvm_query( Global.theCVMEp, y_m, x_m, z_m, &g_props );
+		res = CVMBogota( y_m, x_m, z_m, &g_props );
 
 		if (res != 0) {
 		    continue;
@@ -7454,8 +7455,8 @@ mesh_correct_properties( etree_t* cvm )
 
             		}
 
-                    res = cvm_query( Global.theCVMEp, east_m, north_m,
-                                     depth_m, &g_props );
+                    res = CVMBogota(east_m, north_m,
+                                    depth_m, &g_props );
 
                     if (res != 0) {
                         fprintf(stderr, "Cannot find the query point: east = %lf, north = %lf, depth = %lf \n",
