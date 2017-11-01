@@ -17,7 +17,7 @@
 #endif /* CVMBogotaLibraryHercules_h */
 
 #define sizeplane 330418 //This variable changes if the size of the plane is not 653*506
-#define spacing 200      //grid spacing from input plane
+#define GridSpacing 200      //grid spacing from input plane
 #define nx 653           //number of grig points in x-dir, input plane
 #define ny 506           //number of grig points in y-dir, input plane
 
@@ -61,4 +61,4 @@ double ClosestNeg(int nData, double** diff );
 double ClosestPos(int nData, double** diff );
 double interp2(int Nsizeplane, double VectorData[Nsizeplane],double* xcoorvector,double* ycoorvector,double x,double y, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax);
 double interp3(int ndepths ,int Nsizeplane, double VectorDataLower[Nsizeplane],double VectorDataUpper[Nsizeplane],double* xcoorvector,double* ycoorvector,double x,double y, double z, int IndexClosestNeg, int IndexClosestPos, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax, double depthVector[ndepths]);
-int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t* payload)
+int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t* payload);
