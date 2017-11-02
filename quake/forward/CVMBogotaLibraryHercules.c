@@ -366,7 +366,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     }
     
     // The following lines of code read a text file containing the path of each plane --------------------------------------------------------------------------------------------------------
-    FILE *filePlanes = fopen("/Users/Andrea/Desktop/CVMBogota/DatabaseCVMBogota/FilesPlanesName.txt","r");
+    FILE *filePlanes = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesName.txt","r");
     
     int entryCount;
     fscanf(filePlanes, "%i", &entryCount);
@@ -384,7 +384,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     fclose(filePlanes); // Clean up
     
     // load polygon coordinates in the local system of Hercules --------------------------------------------------------------------------------------------------------
-    FILE *fileCoordinates = fopen("/Users/Andrea/Desktop/CVMBogota/DatabaseCVMBogota/CoordinatesStudyArea.txt","r");
+    FILE *fileCoordinates = fopen("/u/sciteam/rianoesc/bogotadatabase/CoordinatesStudyArea.txt","r");
     Coordinates *coordinates = malloc(sizeof(Coordinates)*sizeplane); // for sizeplane entries structs
     
     for (int i=0; i<sizeplane;i++)
