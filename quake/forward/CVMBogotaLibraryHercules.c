@@ -75,8 +75,8 @@ double** DiffVector(int NData, double DataVector[NData], double DataPointInteres
 {
     // allocating numDepthsAvailable rows
     double** diff =  (double**)malloc(NData*sizeof(double*));
-    
-    for (int i=0; i<NData; i++)
+    int i;
+    for (i = 0; i<NData; i++)
     {
         // allocating 2 columns in each row
         diff[i]=(double *)malloc(sizeof(double)*2);
@@ -94,7 +94,8 @@ double DiffEqualZero(int nData, double** diff )
 {
     int idPosZero;
     double minval;
-    for (int i=0; i<nData; i++)
+    int i;
+    for ( i=0; i<nData; i++)
     {
         // printf("%lf\n",diff[i][0]); debug checkpoint
         if (diff[i][0]==0)
@@ -121,8 +122,8 @@ double ClosestNeg(int nData, double** diff )
     double minvalneg=-1000000000000;
     double closestvalNegative;
     int idClosestNeg;
-    
-    for (int i=0; i<nData; i++)
+    int i;
+    for ( i=0; i<nData; i++)
     {
         if (diff[i][0]<0 && diff[i][0]>minvalneg)
         {
@@ -143,8 +144,8 @@ double ClosestPos(int nData, double** diff )
     double minvalpos=10000000000000;
     double closestminvalPositive;
     int idClosestPos;
-    
-    for (int i=0; i<nData; i++)
+    int i;
+    for ( i=0; i<nData; i++)
     {
         if (diff[i][0]>0 && diff[i][0]<minvalpos)
         {
@@ -352,14 +353,15 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     double* ycoorvector = (double *)malloc(sizeof(double)*ny);
     xcoorvector[0]=0;
     ycoorvector[0]=0;
-    
-    for (int i=1; i<nx;i++)
+    int i;
+
+    for ( i=1; i<nx;i++)
     {
         xcoorvector[i]=xcoorvector[i-1]+GridSpacing;
         //printf("%lf\n", xcoorvector[i]);  // debug chekpoint
         
     }
-    for (int i=1; i<ny;i++)
+    for ( i=1; i<ny;i++)
     {
         ycoorvector[i]=ycoorvector[i-1]+GridSpacing;
         //printf("%lf\n", ycoorvector[i]);  // debug chekpoint
@@ -372,7 +374,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     fscanf(filePlanes, "%i", &entryCount);
     Entry *entries = malloc(sizeof(Entry)*entryCount); // for 82 entries structs
     
-    for (int i=0; i<entryCount;i++)
+    for ( i=0; i<entryCount;i++)
     {
         int nameLen;
         fscanf(filePlanes,"%i",&nameLen);
@@ -387,7 +389,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     FILE *fileCoordinates = fopen("/u/sciteam/rianoesc/bogotadatabase/CoordinatesStudyArea.txt","r");
     Coordinates *coordinates = malloc(sizeof(Coordinates)*sizeplane); // for sizeplane entries structs
     
-    for (int i=0; i<sizeplane;i++)
+    for ( i=0; i<sizeplane;i++)
     {
         fscanf(fileCoordinates,"%lf %lf", &coordinates[i].xcoor, &coordinates[i].ycoor);
         //printf("%lf %lf\n",coordinates[i].xcoor,coordinates[i].ycoor);  // debug chekpoint
@@ -399,7 +401,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     // Find the planes or plane that are/is needed to interpolate depending on the depth given as input --------------------------------------------------------------------------------------------------------
     /* 1. Find the difference vector between the depth of the point and available depths */
     double depthVector[entryCount];
-    for (int i=0; i<entryCount;i++)
+    for ( i=0; i<entryCount;i++)
     {
         depthVector[i]=entries[i].Depth;
         //printf("%lf \n", depthVector[i]); //debug point to check depthvector
@@ -428,7 +430,8 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
         
         FILE *file = fopen(entries[IndexZero].name,"r");
         //printf("%s\n",entries[IndexZero].name);
-        for (int j=0; j<sizeplane;j++)
+        int j;
+        for ( j=0; j<sizeplane;j++)
         {
             fscanf(file,"%lf %lf %lf %lf %lf %lf %lf", &planeData[nPlanes].Xcoor[j], &planeData[nPlanes].Ycoor[j], &planeData[nPlanes].Elevation[j], &planeData[nPlanes].Depth[j], &planeData[nPlanes].Vp[j], &planeData[nPlanes].Vs[j], &planeData[nPlanes].Ro[j]);
             //printf("%lf %lf %lf %lf %lf %lf %lf", planeData[IndexZero].Xcoor[j], planeData[IndexZero].Ycoor[j], planeData[IndexZero].Elevation[j], planeData[IndexZero].Depth[j], planeData[IndexZero].Vp[j], planeData[IndexZero].Vs[j], planeData[IndexZero].Ro[j]);
@@ -513,7 +516,8 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
         FILE *fileUpperPlane = fopen(entries[IndexClosestNeg].name,"r");
         //printf("%s\n",entries[IndexClosestPos].name);
         //printf("%s\n",entries[IndexClosestNeg].name);
-        for (int j=0; j<sizeplane;j++)
+        int j;
+        for ( j=0; j<sizeplane;j++ )
         {
             fscanf(fileLowerPlane,"%lf %lf %lf %lf %lf %lf %lf", &planeDataLower[nPlanes].Xcoor[j], &planeDataLower[nPlanes].Ycoor[j], &planeDataLower[nPlanes].Elevation[j], &planeDataLower[nPlanes].Depth[j], &planeDataLower[nPlanes].Vp[j], &planeDataLower[nPlanes].Vs[j], &planeDataLower[nPlanes].Ro[j]);
             
@@ -577,9 +581,10 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     }
     
     // Dealocate memory assigned to the structure entries PlanesData and entries.name
-    for (int i=0; i<entryCount;i++)
+    int ii;
+    for ( ii=0; ii<entryCount;ii++)
     {
-        free(entries[i].name);
+        free(entries[ii].name);
     }
     free(entries);
     free(diff);
