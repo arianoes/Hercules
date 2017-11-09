@@ -355,13 +355,13 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     
     for (int i=1; i<nx;i++)
     {
-        xcoorvector[i]=xcoorvector[i-1]+spacing;
+        xcoorvector[i]=xcoorvector[i-1]+GridSpacing;
         //printf("%lf\n", xcoorvector[i]);  // debug chekpoint
         
     }
     for (int i=1; i<ny;i++)
     {
-        ycoorvector[i]=ycoorvector[i-1]+spacing;
+        ycoorvector[i]=ycoorvector[i-1]+GridSpacing;
         //printf("%lf\n", ycoorvector[i]);  // debug chekpoint
     }
     
