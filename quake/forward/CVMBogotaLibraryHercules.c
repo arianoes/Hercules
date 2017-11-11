@@ -32,7 +32,7 @@ double get_lat(double x, double y) {
 
 double get_lon(double x, double y) {
     
-    // Longitudes of Bogota region corners
+    // Longitudes of ShakeOut region corners
     return bilinear(x,y,
                     0, 0, 130402.370855, 101000.008112,
                     -74.702151, -73.7294453,
@@ -94,7 +94,7 @@ double DiffEqualZero(int nData, double** diff )
 {
     int idPosZero;
     double minval;
-    int i;
+    int i=0;
     for (i=0; i<nData; i++)
     {
         // printf("%lf\n",diff[i][0]); debug checkpoint
@@ -339,8 +339,8 @@ double interp3(int ndepths ,int Nsizeplane, double VectorDataLower[Nsizeplane],d
 int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t* payload)
 {
     // A polygon inside the CVM region
-    double distXcornerc11 = 0;     //if = 0 it means that the simulation area starts in the x origin of the CVM region
-    double distYcornerc11 = 30000; //if = 0 it means that the simulation area starts in the y origin of the CVM region
+    double distXcornerc11 = 0;     //if =0 it means simulation area starts in the x origin of the CVM region
+    double distYcornerc11 = 30000; //if =0 it means simulation area starts in the y origin of the CVM region
     double x = XcoorPoint + distXcornerc11;
     double y = YcoorPoint + distYcornerc11;
     // Convert input coordinates from XY to LL
@@ -354,7 +354,6 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
     xcoorvector[0]=0;
     ycoorvector[0]=0;
     int i;
-
     for (i=1; i<nx;i++)
     {
         xcoorvector[i]=xcoorvector[i-1]+GridSpacing;
@@ -503,9 +502,31 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
             CVMResult[2]=interp2(sizeplane,planeData[nPlanes].Ro,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
             //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]);
         }
-        free(planeData); ///////////////////////////
+        
+        // Dealocate PlaneData and Diff vectors
+        
+        free(planeData);
+        planeData=NULL;
+        for (i=0; i<entryCount;i++)
+        {
+            free(diff[i]);
+        }
+        free(diff);
+        diff=NULL;
+        for (i=0; i<nx;i++)
+        {
+            free(DiffXcoor[i]);
+        }
+        DiffXcoor=NULL;
+        free(DiffXcoor);
+        for (i=0; i<ny;i++)
+        {
+            free(DiffYcoor[i]);
+        }
+        free(DiffYcoor);
+        DiffYcoor=NULL;
     }
-    else
+    else //3D
     {
         int nPlanes = 0; //this is always 0
         CVMPlane *planeDataLower = malloc(sizeof(CVMPlane)*1); // for 1 plane structs
@@ -529,8 +550,6 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
         // Clean up
         fclose(fileLowerPlane);
         fclose(fileUpperPlane);
-        
-        
         // 3D INTERPOLATION STARTS HERE --------------------------------------------------------------------------------------------------
         /* 1. find diff between the x-coor and y-coor of the point of interest and the plane grid coordinates */
         
@@ -578,24 +597,51 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,cvmpayload_t
         }
         free(planeDataLower);
         free(planeDataUpper);
+        planeDataLower=NULL;
+        planeDataUpper=NULL;
+        for (i=0; i<nx;i++)
+        {
+            free(DiffXcoor[i]);
+        }
+        DiffXcoor=NULL;
+        free(DiffXcoor);
+        for (i=0; i<ny;i++)
+        {
+            free(DiffYcoor[i]);
+        }
+        free(DiffYcoor);
+        DiffYcoor=NULL;
     }
-    
-    // Dealocate memory assigned to the structure entries PlanesData and entries.name
-    for (i=0; i<entryCount;i++)
-    {
-        free(entries[i].name);
-    }
-    free(entries);
-    free(diff);
-    free(coordinatesVector);
-    //printf("\n");
-    
     // Define coordinates vector for interpolation --------------------------------------------------------------------------------------------------------
     payload->Vp=CVMResult[0];
     payload->Vs=CVMResult[1];
     payload->rho=CVMResult[2]*1000; // density in kg/m3
     //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],CVMResult[0],CVMResult[1],CVMResult[2]);
-    //printf("%lf %lf %lf\n", payload->Vp,payload->Vs,payload->Ro);
+    printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],payload->Vp,payload->Vs,payload->Ro);
+    
+    // Dealocate memory assigned to the structures
+    for (i=0; i<entryCount;i++)
+    {
+        free(entries[i].name);
+    }
+    free(entries);
+    entries=NULL;
+    free(coordinates);
+    coordinates=NULL;
+    free(xcoorvector);
+    xcoorvector=NULL;
+    free(ycoorvector);
+    ycoorvector=NULL;
+    free(coordinatesVector);
+    coordinatesVector=NULL;
+    if (CVMResult[0] == 0 || CVMResult[1] == 0 || CVMResult[2] == 0)
+    {
+        printf("%s\n", "CVM ERROR");
+        free(CVMResult);
+        CVMResult=NULL;
+        return -1; //error
+    }
     free(CVMResult);
+    CVMResult=NULL;
     return 0;
 }
