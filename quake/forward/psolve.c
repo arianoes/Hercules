@@ -2223,7 +2223,7 @@ mesh_generate()
 
 #ifdef USECVMDB
     /* Close the material database */
-    etree_close(Global.theCVMEp);
+    //etree_close(Global.theCVMEp);
 #else
     free(Global.theCVMRecord);
 #endif /* USECVMDB */
