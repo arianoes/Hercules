@@ -1407,7 +1407,7 @@ setrec( octant_t* leaf, double ticksize, void* data )
                     z_m -= get_surface_shift();
 		}
 
-		res = CVMBogota( y_m, x_m, z_m, &g_props );
+		res = CVMBogota( y_m, x_m, z_m, Param.FilesDataBogota, Param.PlanesBogota, &g_props );
 
 		if (res != 0) {
 		    continue;
@@ -7462,7 +7462,7 @@ mesh_correct_properties( etree_t* cvm )
             		}
 
                     res = CVMBogota(east_m, north_m,
-                                    depth_m, &g_props );
+                                    depth_m, Param.FilesDataBogota, Param.PlanesBogota, &g_props );
 
                     if (res != 0) {
                         fprintf(stderr, "Cannot find the query point: east = %lf, north = %lf, depth = %lf \n",
