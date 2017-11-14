@@ -59,6 +59,8 @@
 #include "meshformatlab.h"
 #include "topography.h"
 #include "CVMBogotaLibraryHercules.h"
+#include "BogotaPlanesLoading.h"
+#include "BogotaFilesData.h"
 
 /* ONLY GLOBAL VARIABLES ALLOWED OUTSIDE OF PARAM. and GLOBAL. IN ALL OF PSOLVE!! */
 MPI_Comm comm_solver;
@@ -263,6 +265,10 @@ static struct Param_t {
     double  theDomainZ;
     noyesflag_t  drmImplement;
     drm_part_t   theDrmPart;
+    //double** FilesDataBogota[sizeplane*nPlanesBogota][4];
+    //double** PlanesBogota[nPlanesBogota][4];
+    double** FilesDataBogota;
+    double** PlanesBogota;
 
 } Param = {
     .FourDOutFp = NULL,
@@ -7684,6 +7690,12 @@ int main( int argc, char** argv )
 
     /* Read input parameters from file */
     read_parameters(argc, argv);
+
+    /* Read bogota database from file */
+    //double** FilesData;
+    //double** dataPlaneOutput;
+    Param.FilesDataBogota=Bogota_Files_Data();
+    Param.PlanesBogota=Bogota_Planes_Loading();
 
     /* Create and open database */
     //open_cvmdb();
