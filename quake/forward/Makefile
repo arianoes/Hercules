@@ -50,9 +50,9 @@ endif
 #
 PSOLVE_OBJECTS = psolve.o nrutila.o quakesource.o geometrics.o nonlinear.o \
 	commutil.o util.o output.o io_planes.o io_checkpoint.o stiffness.o damping.o \
-	quake_util.o timers.o buildings.o meshformatlab.o drm.o topography.o CVMBogotaLibraryHercules.o \
-	LoadingFilesDataBogota LoadingPlanesBogotaCVM.o
-
+	quake_util.o timers.o buildings.o meshformatlab.o drm.o topography.o \
+        CVMBogotaLibraryHercules.o LoadingFilesDataBogota.o LoadingPlanesBogotaCVM.o \
+	
 OBJECTS = qmesh.o q4.o single_query.o ${PSOLVE_OBJECTS}
 
 .PHONY: all tags clean cleanall move_cxx_repository

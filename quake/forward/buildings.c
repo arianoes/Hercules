@@ -257,7 +257,7 @@ void get_airprops( octant_t *leaf, double ticksize, edata_t *edata,
 
 
 	/* Get the Vs at that location on the surface (z = 0) */
-	res = cvm_query(cvm, east_m, north_m, depth_m, &payload);
+	res = cvm_query(cvm, y, x, 0, &props);
     //res = CVMBogota( y, x, 0, DataFilesBogota, PlanesBogota, &props );
 
 	if ( res != 0 ) {

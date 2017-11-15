@@ -7694,10 +7694,8 @@ int main( int argc, char** argv )
     read_parameters(argc, argv);
 
     /* Read bogota database from file */
-    //double** FilesData;
-    //double** dataPlaneOutput;
-    Param.FilesDataBogota=Bogota_Files_Data();
-    Param.PlanesBogota=Bogota_Planes_Loading();
+    DataFilesBogota=loadFilesData();
+    PlanesBogota=loadPlanesCVMBogota();
 
     /* Create and open database */
     //open_cvmdb();
@@ -7880,6 +7878,14 @@ int main( int argc, char** argv )
         planes_close(Global.myID, Param.IO_pool_pe_count, Param.theNumberOfPlanes);
     }
     IO_PES_REJOIN:
+    
+    
+    /* Dealocate memory allocated to global static variables Bogota */
+    free(DataFilesBogota);
+    DataFilesBogota=NULL;
+    free(PlanesBogota);
+    PlanesBogota=NULL;
+
 
     MPI_Finalize();
 
