@@ -11,7 +11,7 @@
 
 double** loadPlanesCVMBogota (void) {
 
-    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
+    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesName.in", "r");
     
     int i;
     int j;
