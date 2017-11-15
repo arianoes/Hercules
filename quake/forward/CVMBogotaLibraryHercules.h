@@ -1,27 +1,27 @@
 //
 //  CVMBogotaLibraryHercules.h
-//  CVMBogotaHercules
+//  CVMBogotaH
 //
-//  Created by Andrea camila Riaño escandon  on 11/13/17.
+//  Created by Andrea camila Riaño escandon  on 11/15/17.
 //  Copyright © 2017 Andrea camila Riaño escandon . All rights reserved.
 //
 
 #ifndef CVMBogotaLibraryHercules_h
 #define CVMBogotaLibraryHercules_h
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "math.h"
-#include "cvm.h"         // strcuture cvmpayload_t is defined in this header file in hercules.
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "LoadingPlanesBogotaCVM.h"
+#include "cvm.h"  // strcuture cvmpayload_t is defined in this header file in hercules.
 
-#define sizeplane 330418 //This variable changes if the size of the plane is not 653*506
-#define GridSpacing 200  //grid spacing from input plane
+//sizeplane and NPlanesBogota are defined in LoadingPlanesBogotaCVM.h
+#define GridSpacing 200  //input planes grid spacing  
 #define nx 653           //number of grig points in x-dir, input plane
 #define ny 506           //number of grig points in y-dir, input plane
-#define nPlanesBogota 82
 
-/*
-typedef struct
+// This structure must be comented in hercules
+/*typedef struct
 {
     float Vp;
     float Vs;
@@ -45,5 +45,6 @@ double ClosestPos(int nData, double** diff );
 double interp2(int Nsizeplane, double* VectorData,double* xcoorvector,double* ycoorvector,double x,double y, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax);
 double interp3(int ndepths ,int Nsizeplane, double* VectorDataLower,double* VectorDataUpper,double* xcoorvector,double* ycoorvector,double x,double y, double z, int IndexClosestNeg, int IndexClosestPos, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax, double depthVector[ndepths]);
 int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** FilesData,double** dataPlaneOutput, cvmpayload_t* payload);
+
 
 #endif /* CVMBogotaLibraryHercules_h */

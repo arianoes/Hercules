@@ -1,8 +1,8 @@
 //
 //  CVMBogotaLibraryHercules.c
-//  CVMBogotaHercules
+//  CVMBogotaH
 //
-//  Created by Andrea camila Riaño escandon  on 11/13/17.
+//  Created by Andrea camila Riaño escandon  on 11/15/17.
 //  Copyright © 2017 Andrea camila Riaño escandon . All rights reserved.
 //
 
@@ -23,7 +23,7 @@ double bilinear(double x, double y,
 
 double get_lat(double x, double y) {
     
-    // Latitudes of Bogota region corners
+    // Latitudes of Bogota region corners (130x101)--ARGGIS
     return bilinear(x,y,
                     0, 0, 130402.370855, 101000.008112,
                     4.460303, 3.799435,
@@ -32,7 +32,7 @@ double get_lat(double x, double y) {
 
 double get_lon(double x, double y) {
     
-    // Longitudes of ShakeOut region corners
+    // Longitudes of Bogota region corners (130x101)--ARGGIS
     return bilinear(x,y,
                     0, 0, 130402.370855, 101000.008112,
                     -74.702151, -73.7294453,
@@ -368,81 +368,84 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
     
     // Find the planes or plane that are/is needed to interpolate depending on the depth given as input --------------------------------------------------------------------------------------------------------
     /* 1. Find the difference vector between the depth of the point and available depths */
-    double depthVector[nPlanesBogota];
-    for (i=0; i<nPlanesBogota;i++)
+    //double depthVector[nPlanesBogota];
+    double* depthVector = (double *)malloc(sizeof(double)*NPlanesBogota);
+    for (i=0; i<NPlanesBogota;i++)
     {
-        depthVector[i]=FilesData[i][2];
+        depthVector[i]=FilesData[i][1];
+        //printf("%lf \n", FilesData[i][1]);//debug point to check depthvector
         //printf("%lf \n", depthVector[i]); //debug point to check depthvector
     }
     double** diff;
-    diff=DiffVector(nPlanesBogota,depthVector,DepthPoint);
+    diff=DiffVector(NPlanesBogota,depthVector,DepthPoint);
     
     /* 2. find if the min dif == max dif == 0 or if min dif =~ max dif */
     int IndexZero;
     int IndexClosestNeg;
     int IndexClosestPos;
-    IndexZero = DiffEqualZero(nPlanesBogota,diff); //find index for diff=0, if result = -1 there's no diff=0
-    IndexClosestNeg = ClosestNeg(nPlanesBogota,diff);
-    IndexClosestPos = ClosestPos(nPlanesBogota,diff);
+    IndexZero = DiffEqualZero(NPlanesBogota,diff); //find index for diff=0, if result = -1 there's no diff=0
+    IndexClosestNeg = ClosestNeg(NPlanesBogota,diff);
+    IndexClosestPos = ClosestPos(NPlanesBogota,diff);
     
     /* 3. Define if I need to perform a 2D interp or a 3D interp. If IndexZero=~0 2D interp, 3D interp otherwise. */
     //------------------------------------------------------------------------------------------If IndexZero == -1 means that there is not a plane with the input Depth
     // 2D INTERPD
-if (IndexZero != -1) // 2D INTERPOLATION STARTS HERE ------------------------------------------------------
-{
-    /* 1. find diff between the x-coor and y-coor of the point of interest and the plane grid coordinates */
-    
-    double** DiffXcoor;
-    double** DiffYcoor;
-    DiffXcoor = DiffVector(nx, xcoorvector, XcoorPoint+distXcornerc11);
-    DiffYcoor = DiffVector(ny, ycoorvector, YcoorPoint+distYcornerc11);
-    
-    /* 2. find if the min dif == max dif == 0 or if min dif =~ max dif */
-    int IndexZeroX;
-    int IndexClosestNegX;
-    int IndexClosestPosX;
-    IndexZeroX = DiffEqualZero(nx,DiffXcoor); //find index for diff=0, if result = -1 there's no diff=0
-    IndexClosestNegX = ClosestNeg(nx,DiffXcoor);
-    IndexClosestPosX = ClosestPos(nx,DiffXcoor);
-    
-    int IndexZeroY;
-    int IndexClosestNegY;
-    int IndexClosestPosY;
-    IndexZeroY = DiffEqualZero(ny,DiffYcoor); //find index for diff=0, if result = -1 there's no diff=0
-    IndexClosestNegY = ClosestNeg(ny,DiffYcoor);
-    IndexClosestPosY = ClosestPos(ny,DiffYcoor);
-    
-    /* 3. 2D INTERPOLATION */
-    
-    if (IndexZeroX != -1 && IndexZeroY != -1) // Point in the grid mesh
+    if (IndexZero != -1) // 2D INTERPOLATION STARTS HERE ------------------------------------------------------
     {
-        int posData = IndexZeroX + (nx*IndexZeroY);            //Position of the point in the plane
-        int posVector_i=FilesData[IndexZero][3];               //Position corresponding to the begining of each plane
-        CVMResult[0]= dataPlaneOutput[posData+posVector_i][4]; //planeData[nPlanes].Vp[posData];
-        CVMResult[1]= dataPlaneOutput[posData+posVector_i][5]; //planeData[nPlanes].Vs[posData];
-        CVMResult[2]= dataPlaneOutput[posData+posVector_i][6]; //planeData[nPlanes].Ro[posData];
-        //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
+        /* 1. find diff between the x-coor and y-coor of the point of interest and the plane grid coordinates */
         
-    }
-    
-    else if (IndexZeroX == -1 && IndexZeroY == -1) // Bilinear interp
-    {
-        double x=XcoorPoint+distXcornerc11;
-        double y=YcoorPoint+distYcornerc11;
-        int posVector_i=FilesData[IndexZero][3];
-        int posVector_j=FilesData[IndexZero][4];
-        double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        int j=0;
-        for (i=posVector_i; i<posVector_j+1; i++)
+        double** DiffXcoor;
+        double** DiffYcoor;
+        DiffXcoor = DiffVector(nx, xcoorvector, XcoorPoint+distXcornerc11);
+        DiffYcoor = DiffVector(ny, ycoorvector, YcoorPoint+distYcornerc11);
+        
+        /* 2. find if the min dif == max dif == 0 or if min dif =~ max dif */
+        int IndexZeroX;
+        int IndexClosestNegX;
+        int IndexClosestPosX;
+        IndexZeroX = DiffEqualZero(nx,DiffXcoor); //find index for diff=0, if result = -1 there's no diff=0
+        IndexClosestNegX = ClosestNeg(nx,DiffXcoor);
+        IndexClosestPosX = ClosestPos(nx,DiffXcoor);
+        
+        int IndexZeroY;
+        int IndexClosestNegY;
+        int IndexClosestPosY;
+        IndexZeroY = DiffEqualZero(ny,DiffYcoor); //find index for diff=0, if result = -1 there's no diff=0
+        IndexClosestNegY = ClosestNeg(ny,DiffYcoor);
+        IndexClosestPosY = ClosestPos(ny,DiffYcoor);
+        
+        /* 3. 2D INTERPOLATION */
+        
+        if (IndexZeroX != -1 && IndexZeroY != -1) // Point in the grid mesh
         {
-            dataPlaneVp[j]=dataPlaneOutput[i][4];
-            dataPlaneVs[j]=dataPlaneOutput[i][5];
-            dataPlaneRho[j]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            j=j+1;
+            int posData = IndexZeroX + (nx*IndexZeroY);            //Position of the point in the plane
+            int posVector_i=FilesData[IndexZero][2];               //Position corresponding to the begining of each plane
+            CVMResult[0]= dataPlaneOutput[posData+posVector_i][4]; //planeData[nPlanes].Vp[posData];
+            CVMResult[1]= dataPlaneOutput[posData+posVector_i][5]; //planeData[nPlanes].Vs[posData];
+            CVMResult[2]= dataPlaneOutput[posData+posVector_i][6]; //planeData[nPlanes].Ro[posData];
+            //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
+            
         }
+        
+        else if (IndexZeroX == -1 && IndexZeroY == -1) // Bilinear interp
+        {
+            double x=XcoorPoint+distXcornerc11;
+            double y=YcoorPoint+distYcornerc11;
+            int posVector_i=FilesData[IndexZero][2];
+            int posVector_j=FilesData[IndexZero][3];
+            double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            int i;
+            int j=0;
+            for (i=posVector_i; i<posVector_j+1; i++)
+            {
+                dataPlaneVp[j]=dataPlaneOutput[i][4];
+                dataPlaneVs[j]=dataPlaneOutput[i][5];
+                dataPlaneRho[j]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                j=j+1;
+            }
             CVMResult[0]=interp2(sizeplane,dataPlaneVp,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx);
             CVMResult[1]=interp2(sizeplane,dataPlaneVs,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx);
             CVMResult[2]=interp2(sizeplane,dataPlaneRho,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx);
@@ -453,27 +456,28 @@ if (IndexZero != -1) // 2D INTERPOLATION STARTS HERE ---------------------------
             dataPlaneVs=NULL;
             free(dataPlaneRho);
             dataPlaneRho=NULL;
-    }
-    
-    else if (IndexZeroX != -1 && IndexZeroY == -1) // linear interp
-    {
-        double x=XcoorPoint+distXcornerc11;
-        double y=YcoorPoint+distYcornerc11;
-        int posVector_i=FilesData[IndexZero][3];
-        int posVector_j=FilesData[IndexZero][4];
-        double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        int j=0;
-        for (i=posVector_i; i<posVector_j+1; i++)
-        {
-            dataPlaneVp[j]=dataPlaneOutput[i][4];
-            dataPlaneVs[j]=dataPlaneOutput[i][5];
-            dataPlaneRho[j]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            j=j+1;
         }
         
+        else if (IndexZeroX != -1 && IndexZeroY == -1) // linear interp
+        {
+            double x=XcoorPoint+distXcornerc11;
+            double y=YcoorPoint+distYcornerc11;
+            int posVector_i=FilesData[IndexZero][2];
+            int posVector_j=FilesData[IndexZero][3];
+            double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            int i;
+            int j=0;
+            for (i=posVector_i; i<posVector_j+1; i++)
+            {
+                dataPlaneVp[j]=dataPlaneOutput[i][4];
+                dataPlaneVs[j]=dataPlaneOutput[i][5];
+                dataPlaneRho[j]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                j=j+1;
+            }
+            
             CVMResult[0]=interp2(sizeplane,dataPlaneVp,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
             CVMResult[1]=interp2(sizeplane,dataPlaneVs,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
             CVMResult[2]=interp2(sizeplane,dataPlaneRho,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
@@ -484,202 +488,207 @@ if (IndexZero != -1) // 2D INTERPOLATION STARTS HERE ---------------------------
             dataPlaneVs=NULL;
             free(dataPlaneRho);
             dataPlaneRho=NULL;
-    }
-    
-    else if (IndexZeroX == -1 && IndexZeroY != -1) // linear interp
-    {
-        double x=XcoorPoint+distXcornerc11;
-        double y=YcoorPoint+distYcornerc11;
-        int posVector_i=FilesData[IndexZero][3];
-        int posVector_j=FilesData[IndexZero][4];
-        double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        int j=0;
-        for (i=posVector_i; i<posVector_j+1; i++)
-        {
-            dataPlaneVp[j]=dataPlaneOutput[i][4];
-            dataPlaneVs[j]=dataPlaneOutput[i][5];
-            dataPlaneRho[j]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            j=j+1;
         }
+        
+        else if (IndexZeroX == -1 && IndexZeroY != -1) // linear interp
+        {
+            double x=XcoorPoint+distXcornerc11;
+            double y=YcoorPoint+distYcornerc11;
+            int posVector_i=FilesData[IndexZero][2];
+            int posVector_j=FilesData[IndexZero][3];
+            double* dataPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            int i;
+            int j=0;
+            for (i=posVector_i; i<posVector_j+1; i++)
+            {
+                dataPlaneVp[j]=dataPlaneOutput[i][4];
+                dataPlaneVs[j]=dataPlaneOutput[i][5];
+                dataPlaneRho[j]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                j=j+1;
+            }
             CVMResult[0]=interp2(sizeplane,dataPlaneVp,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
             CVMResult[1]=interp2(sizeplane,dataPlaneVs,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
             CVMResult[2]=interp2(sizeplane,dataPlaneRho,xcoorvector,ycoorvector,x,y,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx);
-        //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
-        free(dataPlaneVp);
-        dataPlaneVp=NULL;
-        free(dataPlaneVs);
-        dataPlaneVs=NULL;
-        free(dataPlaneRho);
-        dataPlaneRho=NULL;
-    }
-    // Dealocate memory
-    for (i=0; i<nPlanesBogota;i++)
-    {
-        free(diff[i]);
-    }
-    free(diff);
-    diff=NULL;
-    for (i=0; i<nx;i++)
-    {
-        free(DiffXcoor[i]);
-    }
-    DiffXcoor=NULL;
-    free(DiffXcoor);
-    for (i=0; i<ny;i++)
-    {
-        free(DiffYcoor[i]);
-    }
-    free(DiffYcoor);
-    DiffYcoor=NULL;
-}
-else // 3D INTERPOLATION STARTS HERE ------------------------------------------------------
-{
-    /* 1. find diff between the x-coor and y-coor of the point of interest and the plane grid coordinates */
-    
-    double** DiffXcoor;
-    double** DiffYcoor;
-    DiffXcoor = DiffVector(nx, xcoorvector, XcoorPoint+distXcornerc11);
-    DiffYcoor = DiffVector(ny, ycoorvector, YcoorPoint+distYcornerc11);
-    
-    /* 2. find if the min dif == max dif == 0 or if min dif =~ max dif */
-    int IndexZeroX;
-    int IndexClosestNegX;
-    int IndexClosestPosX;
-    IndexZeroX = DiffEqualZero(nx,DiffXcoor); //find index for diff=0, if result = -1 there's no diff=0
-    IndexClosestNegX = ClosestNeg(nx,DiffXcoor);
-    IndexClosestPosX = ClosestPos(nx,DiffXcoor);
-    
-    int IndexZeroY;
-    int IndexClosestNegY;
-    int IndexClosestPosY;
-    IndexZeroY = DiffEqualZero(ny,DiffYcoor); //find index for diff=0, if result = -1 there's no diff=0
-    IndexClosestNegY = ClosestNeg(ny,DiffYcoor);
-    IndexClosestPosY = ClosestPos(ny,DiffYcoor);
-    
-    
-    /* 3. 3D INTERPOLATION */
-
-    if (IndexZeroX == -1 && IndexZeroY == -1) // Trilinear interp
-    {
-        double x=XcoorPoint+distXcornerc11;
-        double y=YcoorPoint+distYcornerc11;
-        double z=DepthPoint;
-        int LowerPlanePosVector_i=FilesData[IndexClosestPos][3];
-        int LowerPlanePosVector_j=FilesData[IndexClosestPos][4];
-        int UpperPlanePosVector_i=FilesData[IndexClosestNeg][3];
-        int UpperPlanePosVector_j=FilesData[IndexClosestNeg][4];
-        double* dataLowerPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataLowerPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataLowerPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        int j=0;
-        int k=0;
-        for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
-        {
-            dataLowerPlaneVp[j]=dataPlaneOutput[i][4];
-            dataLowerPlaneVs[j]=dataPlaneOutput[i][5];
-            dataLowerPlaneRho[j]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            j=j+1;
+            //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
+            free(dataPlaneVp);
+            dataPlaneVp=NULL;
+            free(dataPlaneVs);
+            dataPlaneVs=NULL;
+            free(dataPlaneRho);
+            dataPlaneRho=NULL;
         }
-        for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
+        // Dealocate memory
+        int i;
+        for (i=0; i<NPlanesBogota;i++)
         {
-            dataUpperPlaneVp[k]=dataPlaneOutput[i][4];
-            dataUpperPlaneVs[k]=dataPlaneOutput[i][5];
-            dataUpperPlaneRho[k]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            k=k+1;
+            free(diff[i]);
         }
-        CVMResult[0]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneVp,dataUpperPlaneVp,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
-        CVMResult[1]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneVs,dataUpperPlaneVs,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
-        CVMResult[2]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneRho,dataUpperPlaneRho,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
-        //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
-        free(dataLowerPlaneVp);
-        dataLowerPlaneVp=NULL;
-        free(dataLowerPlaneVs);
-        dataLowerPlaneVs=NULL;
-        free(dataLowerPlaneRho);
-        dataLowerPlaneRho=NULL;
-        free(dataUpperPlaneVp);
-        dataUpperPlaneVp=NULL;
-        free(dataUpperPlaneVs);
-        dataUpperPlaneVs=NULL;
-        free(dataUpperPlaneRho);
-        dataUpperPlaneRho=NULL;
-    }
-    else //if (IndexZeroX != -1 && IndexZeroY != -1) // linear interp
-    {
-        double x=XcoorPoint+distXcornerc11;
-        double y=YcoorPoint+distYcornerc11;
-        double z=DepthPoint;
-        int LowerPlanePosVector_i=FilesData[IndexClosestPos][3];
-        int LowerPlanePosVector_j=FilesData[IndexClosestPos][4];
-        int UpperPlanePosVector_i=FilesData[IndexClosestNeg][3];
-        int UpperPlanePosVector_j=FilesData[IndexClosestNeg][4];
-        double* dataLowerPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataLowerPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataLowerPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
-        double* dataUpperPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
-        int j=0;
-        int k=0;
-        for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
+        free(diff);
+        diff=NULL;
+        for (i=0; i<nx;i++)
         {
-            dataLowerPlaneVp[j]=dataPlaneOutput[i][4];
-            dataLowerPlaneVs[j]=dataPlaneOutput[i][5];
-            dataLowerPlaneRho[j]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            j=j+1;
+            free(DiffXcoor[i]);
         }
-        for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
+        DiffXcoor=NULL;
+        free(DiffXcoor);
+        for (i=0; i<ny;i++)
         {
-            dataUpperPlaneVp[k]=dataPlaneOutput[i][4];
-            dataUpperPlaneVs[k]=dataPlaneOutput[i][5];
-            dataUpperPlaneRho[k]=dataPlaneOutput[i][6];
-            //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
-            k=k+1;
+            free(DiffYcoor[i]);
         }
-            CVMResult[0]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneVp,dataUpperPlaneVp,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
-            CVMResult[1]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneVs,dataUpperPlaneVs,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
-            CVMResult[2]=interp3(nPlanesBogota,sizeplane,dataLowerPlaneRho,dataUpperPlaneRho,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
-        //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
-        free(dataLowerPlaneVp);
-        dataLowerPlaneVp=NULL;
-        free(dataLowerPlaneVs);
-        dataLowerPlaneVs=NULL;
-        free(dataLowerPlaneRho);
-        dataLowerPlaneRho=NULL;
-        free(dataUpperPlaneVp);
-        dataUpperPlaneVp=NULL;
-        free(dataUpperPlaneVs);
-        dataUpperPlaneVs=NULL;
-        free(dataUpperPlaneRho);
-        dataUpperPlaneRho=NULL;
+        free(DiffYcoor);
+        DiffYcoor=NULL;
     }
-    for (i=0; i<nx;i++)
+    else // 3D INTERPOLATION STARTS HERE ------------------------------------------------------
     {
-        free(DiffXcoor[i]);
+        /* 1. find diff between the x-coor and y-coor of the point of interest and the plane grid coordinates */
+        
+        double** DiffXcoor;
+        double** DiffYcoor;
+        DiffXcoor = DiffVector(nx, xcoorvector, XcoorPoint+distXcornerc11);
+        DiffYcoor = DiffVector(ny, ycoorvector, YcoorPoint+distYcornerc11);
+        
+        /* 2. find if the min dif == max dif == 0 or if min dif =~ max dif */
+        int IndexZeroX;
+        int IndexClosestNegX;
+        int IndexClosestPosX;
+        IndexZeroX = DiffEqualZero(nx,DiffXcoor); //find index for diff=0, if result = -1 there's no diff=0
+        IndexClosestNegX = ClosestNeg(nx,DiffXcoor);
+        IndexClosestPosX = ClosestPos(nx,DiffXcoor);
+        
+        int IndexZeroY;
+        int IndexClosestNegY;
+        int IndexClosestPosY;
+        IndexZeroY = DiffEqualZero(ny,DiffYcoor); //find index for diff=0, if result = -1 there's no diff=0
+        IndexClosestNegY = ClosestNeg(ny,DiffYcoor);
+        IndexClosestPosY = ClosestPos(ny,DiffYcoor);
+        
+        
+        /* 3. 3D INTERPOLATION */
+        
+        if (IndexZeroX == -1 && IndexZeroY == -1) // Trilinear interp
+        {
+            double x=XcoorPoint+distXcornerc11;
+            double y=YcoorPoint+distYcornerc11;
+            double z=DepthPoint;
+            int LowerPlanePosVector_i=FilesData[IndexClosestPos][2];
+            int LowerPlanePosVector_j=FilesData[IndexClosestPos][3];
+            int UpperPlanePosVector_i=FilesData[IndexClosestNeg][2];
+            int UpperPlanePosVector_j=FilesData[IndexClosestNeg][3];
+            double* dataLowerPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataLowerPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataLowerPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            int i;
+            int j=0;
+            int k=0;
+            for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
+            {
+                dataLowerPlaneVp[j]=dataPlaneOutput[i][4];
+                dataLowerPlaneVs[j]=dataPlaneOutput[i][5];
+                dataLowerPlaneRho[j]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                j=j+1;
+            }
+            for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
+            {
+                dataUpperPlaneVp[k]=dataPlaneOutput[i][4];
+                dataUpperPlaneVs[k]=dataPlaneOutput[i][5];
+                dataUpperPlaneRho[k]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                k=k+1;
+            }
+            CVMResult[0]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneVp,dataUpperPlaneVp,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
+            CVMResult[1]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneVs,dataUpperPlaneVs,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
+            CVMResult[2]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneRho,dataUpperPlaneRho,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,1,nx,depthVector);
+            //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
+            free(dataLowerPlaneVp);
+            dataLowerPlaneVp=NULL;
+            free(dataLowerPlaneVs);
+            dataLowerPlaneVs=NULL;
+            free(dataLowerPlaneRho);
+            dataLowerPlaneRho=NULL;
+            free(dataUpperPlaneVp);
+            dataUpperPlaneVp=NULL;
+            free(dataUpperPlaneVs);
+            dataUpperPlaneVs=NULL;
+            free(dataUpperPlaneRho);
+            dataUpperPlaneRho=NULL;
+        }
+        else //if (IndexZeroX != -1 && IndexZeroY != -1) // linear interp
+        {
+            double x=XcoorPoint+distXcornerc11;
+            double y=YcoorPoint+distYcornerc11;
+            double z=DepthPoint;
+            int LowerPlanePosVector_i=FilesData[IndexClosestPos][2];
+            int LowerPlanePosVector_j=FilesData[IndexClosestPos][3];
+            int UpperPlanePosVector_i=FilesData[IndexClosestNeg][2];
+            int UpperPlanePosVector_j=FilesData[IndexClosestNeg][3];
+            double* dataLowerPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataLowerPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataLowerPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneVp = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneVs = (double *)malloc(sizeof(double)*sizeplane);
+            double* dataUpperPlaneRho = (double *)malloc(sizeof(double)*sizeplane);
+            int i;
+            int j=0;
+            int k=0;
+            for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
+            {
+                dataLowerPlaneVp[j]=dataPlaneOutput[i][4];
+                dataLowerPlaneVs[j]=dataPlaneOutput[i][5];
+                dataLowerPlaneRho[j]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                j=j+1;
+            }
+            for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
+            {
+                dataUpperPlaneVp[k]=dataPlaneOutput[i][4];
+                dataUpperPlaneVs[k]=dataPlaneOutput[i][5];
+                dataUpperPlaneRho[k]=dataPlaneOutput[i][6];
+                //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
+                k=k+1;
+            }
+            CVMResult[0]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneVp,dataUpperPlaneVp,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
+            CVMResult[1]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneVs,dataUpperPlaneVs,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
+            CVMResult[2]=interp3(NPlanesBogota,sizeplane,dataLowerPlaneRho,dataUpperPlaneRho,xcoorvector,ycoorvector,x,y,z,IndexClosestNeg,IndexClosestPos,IndexClosestNegX,IndexClosestPosX,IndexClosestNegY,IndexClosestPosY,IndexZeroX,IndexZeroY,2,nx,depthVector);
+            //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
+            free(dataLowerPlaneVp);
+            dataLowerPlaneVp=NULL;
+            free(dataLowerPlaneVs);
+            dataLowerPlaneVs=NULL;
+            free(dataLowerPlaneRho);
+            dataLowerPlaneRho=NULL;
+            free(dataUpperPlaneVp);
+            dataUpperPlaneVp=NULL;
+            free(dataUpperPlaneVs);
+            dataUpperPlaneVs=NULL;
+            free(dataUpperPlaneRho);
+            dataUpperPlaneRho=NULL;
+        }
+        int i;
+        for (i=0; i<nx;i++)
+        {
+            free(DiffXcoor[i]);
+        }
+        DiffXcoor=NULL;
+        free(DiffXcoor);
+        for (i=0; i<ny;i++)
+        {
+            free(DiffYcoor[i]);
+        }
+        free(DiffYcoor);
+        DiffYcoor=NULL;
     }
-    DiffXcoor=NULL;
-    free(DiffXcoor);
-    for (i=0; i<ny;i++)
-    {
-        free(DiffYcoor[i]);
-    }
-    free(DiffYcoor);
-    DiffYcoor=NULL;
-}
     payload->Vp=CVMResult[0];
     payload->Vs=CVMResult[1];
     payload->rho=CVMResult[2]*1000; // density in kg/m3
     //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],CVMResult[0],CVMResult[1],CVMResult[2]*1000);
-    //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],payload->Vp,payload->Vs,payload->rho);
+    //printf("%lf %lf %lf %.11lf %.11lf %lf %lf %lf %lf\n", XcoorPoint, XcoorPoint, DepthPoint, coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],payload->Vp,payload->Vs,payload->rho);
     // Dealocate memory assigned to the structures
     free(xcoorvector);
     xcoorvector=NULL;

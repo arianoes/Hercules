@@ -58,9 +58,10 @@
 #include "drm.h"
 #include "meshformatlab.h"
 #include "topography.h"
+#include "LoadingFilesDataBogota.h"
+#include "LoadingPlanesBogotaCVM.h"
 #include "CVMBogotaLibraryHercules.h"
-#include "BogotaPlanesLoading.h"
-#include "BogotaFilesData.h"
+
 
 /* ONLY GLOBAL VARIABLES ALLOWED OUTSIDE OF PARAM. and GLOBAL. IN ALL OF PSOLVE!! */
 MPI_Comm comm_solver;
@@ -265,10 +266,6 @@ static struct Param_t {
     double  theDomainZ;
     noyesflag_t  drmImplement;
     drm_part_t   theDrmPart;
-    //double** FilesDataBogota[sizeplane*nPlanesBogota][4];
-    //double** PlanesBogota[nPlanesBogota][4];
-    double** FilesDataBogota;
-    double** PlanesBogota;
 
 } Param = {
     .FourDOutFp = NULL,
@@ -343,6 +340,11 @@ static struct Global_t {
     .fpsource = NULL,
     .theCVMRecordSize = sizeof(cvmrecord_t)
 };
+
+// Global variables Bogota
+static double ** DataFilesBogota; //array that stores planes characteristics
+static double ** PlanesBogota;    //array that stores all planes data (long lat elevation deth Vp Vs Rho)
+
 
 /* ------------------------------End of declarations------------------------------ */
 
@@ -1407,7 +1409,7 @@ setrec( octant_t* leaf, double ticksize, void* data )
                     z_m -= get_surface_shift();
 		}
 
-		res = CVMBogota( y_m, x_m, z_m, Param.FilesDataBogota, Param.PlanesBogota, &g_props );
+		res = CVMBogota( y_m, x_m, z_m, DataFilesBogota, PlanesBogota, &g_props );
 
 		if (res != 0) {
 		    continue;
@@ -7462,7 +7464,7 @@ mesh_correct_properties( etree_t* cvm )
             		}
 
                     res = CVMBogota(east_m, north_m,
-                                    depth_m, Param.FilesDataBogota, Param.PlanesBogota, &g_props );
+                                    depth_m, DataFilesBogota, PlanesBogota, &g_props );
 
                     if (res != 0) {
                         fprintf(stderr, "Cannot find the query point: east = %lf, north = %lf, depth = %lf \n",
