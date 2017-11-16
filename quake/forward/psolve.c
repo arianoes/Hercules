@@ -7636,6 +7636,7 @@ int main( int argc, char** argv )
     MPI_Status status;
 #endif /* DEBUG */
 
+    
     /* MPI initialization */
     MPI_Init(&argc, &argv);
     Timer_Start("Total Wall Clock");

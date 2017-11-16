@@ -16,12 +16,13 @@
 #include "cvm.h"  // strcuture cvmpayload_t is defined in this header file in hercules.
 
 //sizeplane and NPlanesBogota are defined in LoadingPlanesBogotaCVM.h
-#define GridSpacing 200  //input planes grid spacing  
+#define GridSpacing 200  //grid spacing from input plane
 #define nx 653           //number of grig points in x-dir, input plane
 #define ny 506           //number of grig points in y-dir, input plane
 
 // This structure must be comented in hercules
-/*typedef struct
+/*
+typedef struct
 {
     float Vp;
     float Vs;
@@ -42,9 +43,9 @@ double** DiffVector(int NData, double DataVector[NData], double DataPointInteres
 double DiffEqualZero(int nData, double** diff );
 double ClosestNeg(int nData, double** diff );
 double ClosestPos(int nData, double** diff );
-double interp2(int Nsizeplane, double* VectorData,double* xcoorvector,double* ycoorvector,double x,double y, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax);
-double interp3(int ndepths ,int Nsizeplane, double* VectorDataLower,double* VectorDataUpper,double* xcoorvector,double* ycoorvector,double x,double y, double z, int IndexClosestNeg, int IndexClosestPos, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax, double depthVector[ndepths]);
-int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** FilesData,double** dataPlaneOutput, cvmpayload_t* payload);
+double interp2(int Nsizeplane, float* VectorData,double* xcoorvector,double* ycoorvector,double x,double y, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax);
+double interp3(int ndepths ,int Nsizeplane, float* VectorDataLower,float* VectorDataUpper,double* xcoorvector,double* ycoorvector,double x,double y, double z, int IndexClosestNeg, int IndexClosestPos, int IndexClosestNegX, int IndexClosestPosX,int IndexClosestNegY,int IndexClosestPosY, int IndexZeroX,int IndexZeroY, int method, int NDatax, double depthVector[ndepths]);
+int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** FilesData,float** dataPlaneOutput, cvmpayload_t* payload);
 
 
 #endif /* CVMBogotaLibraryHercules_h */

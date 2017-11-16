@@ -28,17 +28,13 @@ typedef struct
 typedef struct
 {
 // This structure stores the values of the CVM for each plane Size = 8 bytes * 7 parameters * sizeplane * number of planes
-    double Xcoor;
-    double Ycoor;
-    double Elevation;
-    double Depth;
-    double Vp;
-    double Vs;
-    double Ro;
+    float Vp;
+    float Vs;
+    float Ro;
 } CVMPlane;
 
 
 // Function prototype
-double** loadPlanesCVMBogota (void);
+float** loadPlanesCVMBogota (void);
 
 #endif /* LoadingPlanesBogotaCVM_h */
