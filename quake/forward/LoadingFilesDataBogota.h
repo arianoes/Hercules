@@ -11,6 +11,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#define sizeplane     125751
+#define NPlanesBogota 64
 
 // Variables definition
 
@@ -19,12 +23,10 @@ typedef struct
     char   *namePlanes;
     double IDplane;
     double DepthInputPlane;
-    double PlaneInitialPosition;
-    double PlaneFinalPosition;
     
 } PlanesData;
 
 // Function prototype
-double** loadFilesData (void);
+double* loadFilesData (void);
 
 #endif /* LoadingFilesDataBogota_h */

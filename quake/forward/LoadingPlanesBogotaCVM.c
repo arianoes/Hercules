@@ -9,8 +9,8 @@
 #include "LoadingPlanesBogotaCVM.h"
 
 
-float** loadPlanesCVMBogota (void) {
-
+float* loadPlanesCVMBogota (void) {
+    
     FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
     
     int i;
@@ -23,7 +23,7 @@ float** loadPlanesCVMBogota (void) {
     fscanf(fileB,"%i",&CVM_NPlanes2read);
     
     PlanesName *InputPlanesName = malloc(sizeof(PlanesName)*CVM_NPlanes2read);
-   
+    
     for(i=0; i<CVM_NPlanes2read; i++){
         int CVMnameFileLen;
         fscanf(fileB,"%i",&CVMnameFileLen);
@@ -53,44 +53,38 @@ float** loadPlanesCVMBogota (void) {
         fclose(fileC);
     }
     
-    // output matrix memory allocation
-    float **outputArray;
-    //float *outputArray;
+    float *outputArray;
     int rows = NPlanesBogota*sizeplane;
     int cols = 3;
-    outputArray = (float **)malloc(rows*sizeof(float*));
-    for(l=0; l<rows; l++)
+    outputArray = (float *)malloc(rows*cols*sizeof(float));
+    for(l=0; l<cols; l++)
     {
-        outputArray[l]=(float *)malloc(cols*sizeof(float));
+        for (o=0; o<rows; o++)
+        {
+            int offset = (l * rows) + o;
+            
+            if (l==0) {
+                outputArray[offset]=planeData[o].Vp;
+                //initial position = 0; final position = rows - 1
+                
+            }
+            if (l==1){
+                outputArray[offset]=planeData[o].Vs;
+                //initial position = rows; final position = (2*rows) - 1
+            }
+            if (l==2){
+                outputArray[offset]=planeData[o].Ro;
+                //initial position = (2*rows); final position = (3*rows) - 1
+            }
+            
+        }
     }
-    
-    //store structure data in an ouput arrray.
-    for (o=0; o<rows;o++)
-    {
-        outputArray[o][0]=planeData[o].Vp;
-        outputArray[o][1]=planeData[o].Vs;
-        outputArray[o][2]=planeData[o].Ro;
-        //printf("%lf %lf %lf\n",outputArray[o][0],outputArray[o][1],outputArray[o][2]);
-    }
-    
-    
-    /*
-     outputArray = (float *)malloc(rows*cols*sizeof(float));
-     int m;
-     int mm =0;
-     for(l=0; l<cols; l++)
-     {
-     for (m=0; l<rows; m++)
-     {
-     int offset= l * cols + m;
-     outputArray[offset]=planeData[mm].Vp;
-     outputArray[offset+NPlanesBogota*sizeplane]=planeData[mm].Vs;
-     outputArray[offset+(NPlanesBogota*sizeplane*2)]=planeData[mm].Ro;
-     mm=mm+1;
-     //printf("%i %i %i %i\n",offset,offset+NPlanesBogota*sizeplane,offset+(NPlanesBogota*sizeplane*2),mm-1);
-     }
-     }
-     */
+    //printf("%lf\n",outputArray[0]);            //Vp IDdepth = 0;
+    //printf("%lf\n",outputArray[rows - 1]);     //Vp IDdepth = 82;
+    //printf("%lf\n",outputArray[rows]);         //Vs IDdepth = 0;
+    //printf("%lf\n",outputArray[(2*rows) - 1]); //Vs IDdepth = 82;
+    //printf("%lf\n",outputArray[(2*rows)]);     //Rho IDdepth = 0;
+    //printf("%lf\n",outputArray[(3*rows) - 1]); //Rho IDdepth = 82;
     
     // clean up
     for(i=0; i<CVM_NPlanes2read; i++)

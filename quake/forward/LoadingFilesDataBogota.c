@@ -9,7 +9,7 @@
 #include "LoadingFilesDataBogota.h"
 
 
-double** loadFilesData (void) {
+double* loadFilesData (void) {
 
     FILE *fileA = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
     
@@ -27,27 +27,43 @@ double** loadFilesData (void) {
         int nameFileLen;
         fscanf(fileA,"%i",&nameFileLen);
         InputPlanesData[i].namePlanes=malloc(sizeof(char)*(nameFileLen+1));
-        fscanf(fileA,"%s %lf %lf %lf %lf",InputPlanesData[i].namePlanes,&InputPlanesData[i].IDplane,&InputPlanesData[i].DepthInputPlane,&InputPlanesData[i].PlaneInitialPosition,&InputPlanesData[i].PlaneFinalPosition);
+        fscanf(fileA,"%s %lf %lf",InputPlanesData[i].namePlanes,&InputPlanesData[i].IDplane,&InputPlanesData[i].DepthInputPlane);
     }
     
-    double **OuputData;
+    double *OuputData;
     int rows = NPlanes2read;
-    int cols = 4;
-    // output matrix memory allocation
-    OuputData = (double **)malloc(rows*sizeof(double*));
-    for(j=0; j<NPlanes2read; j++)
+    int cols = 3;
+    OuputData = (double *)malloc(rows*cols*sizeof(double));
+    for(j=0; j<cols; j++)
     {
-        OuputData[j]=(double *)malloc(cols*sizeof(double));
+        for (k=0; k<rows; k++)
+        {
+            int offset = (j * rows) + k;
+            
+            if (j==0) {
+                OuputData[offset]=InputPlanesData[k].DepthInputPlane;
+                //initial position = 0; final position = rows - 1
+                
+            }
+            if (j==1){
+                OuputData[offset]= sizeplane*k; //InputPlanesData[k].PlaneInitialPosition;
+                //initial position = rows; final position = (2*rows) - 1
+            }
+            if (j==2){
+                OuputData[offset]=(sizeplane*(k+1))-1;//InputPlanesData[k].PlaneFinalPosition;
+                //initial position = (2*rows); final position = (3*rows) - 1
+            }
+        }
     }
     
-    for(k=0; k<NPlanes2read; k++)
-    {
-        OuputData[k][0]=InputPlanesData[k].IDplane;
-        OuputData[k][1]=InputPlanesData[k].DepthInputPlane;
-        OuputData[k][2]=InputPlanesData[k].PlaneInitialPosition;
-        OuputData[k][3]=InputPlanesData[k].PlaneFinalPosition;
-    }
+    //printf("%lf\n",OuputData[0]);            //DepthInputPlane IDdepth = 0;
+    //printf("%lf\n",OuputData[rows - 1]);     //DepthInputPlane IDdepth = 82;
+    //printf("%lf\n",OuputData[rows]);         //PlaneInitialPosition IDdepth = 0;
+    //printf("%lf\n",OuputData[(2*rows) - 1]); //PlaneInitialPosition IDdepth = 82;
+    //printf("%lf\n",OuputData[(2*rows)]);     //PlaneFinalPosition IDdepth = 0;
+    //printf("%lf\n",OuputData[(3*rows) - 1]); //PlaneFinalPosition IDdepth = 82;
     
+
     // clean up
     fclose(fileA);
     for(i=0; i<NPlanes2read; i++)

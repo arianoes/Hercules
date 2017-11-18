@@ -11,9 +11,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-#define sizeplane     330418
-#define NPlanesBogota 82
+#define sizeplane     125751
+#define NPlanesBogota 64
 
 typedef struct
 {
@@ -35,6 +36,6 @@ typedef struct
 
 
 // Function prototype
-float** loadPlanesCVMBogota (void);
+float* loadPlanesCVMBogota (void);
 
 #endif /* LoadingPlanesBogotaCVM_h */

@@ -45,13 +45,13 @@ double* convert(double x, double y, double z) {
     double* coordinatesVector =  (double*)malloc(3*sizeof(double));
     
     
-    // 80km in x direction
+    // 130.5km in x direction
     if(x<0 || x>130400){
         fprintf(stderr,"Invalid x, value must be between 0 and max x-coordinate: %lf\n",x);
         //return 1;
     }
     
-    // 60km in y direction
+    // 101km in y direction
     if(y<0 || y>101000){
         fprintf(stderr,"Invalid y, value must be between 0 and max y-coordinate: %lf\n",y);
         //return 1;
@@ -336,15 +336,26 @@ double interp3(int ndepths ,int Nsizeplane, float* VectorDataLower,float* Vector
 }
 
 // function starts here -----------------------------------------------------------------------------------------------------
-int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** FilesData,float** dataPlaneOutput, cvmpayload_t* payload)
+int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double* FilesData,float* dataPlaneOutput, cvmpayload_t* payload)
 {
     // A polygon inside the CVM region
     double distXcornerc11 = 0;     //if =0 it means simulation area starts in the x origin of the CVM region
     double distYcornerc11 = 0; //if =0 it means simulation area starts in the y origin of the CVM region
     double x = XcoorPoint + distXcornerc11;
     double y = YcoorPoint + distYcornerc11;
+    
+    // position file data vector
+    int IniPosDepth=0;
+    int IniPosInitial=NPlanesBogota;
+    int IniPosFinal=NPlanesBogota*2;
+    
+    // position planes data vector
+    int IniPosVp=0;
+    int IniPosVs=NPlanesBogota*sizeplane;
+    int IniPosRho=NPlanesBogota*sizeplane*2;
+    
     // Convert input coordinates from XY to LL
-    double* coordinatesVector = convert(x,y,DepthPoint);
+    //double* coordinatesVector = convert(x,y,DepthPoint);
     
     // Vector for results
     double* CVMResult = (double *)malloc(sizeof(double)*3);
@@ -372,7 +383,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
     double* depthVector = (double *)malloc(sizeof(double)*NPlanesBogota);
     for (i=0; i<NPlanesBogota;i++)
     {
-        depthVector[i]=FilesData[i][1];
+        depthVector[i]=FilesData[IniPosDepth+i];
         //printf("%lf \n", FilesData[i][1]);//debug point to check depthvector
         //printf("%lf \n", depthVector[i]); //debug point to check depthvector
     }
@@ -419,20 +430,19 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
         if (IndexZeroX != -1 && IndexZeroY != -1) // Point in the grid mesh
         {
             int posData = IndexZeroX + (nx*IndexZeroY);            //Position of the point in the plane
-            int posVector_i=FilesData[IndexZero][2];               //Position corresponding to the begining of each plane
-            CVMResult[0]= dataPlaneOutput[posData+posVector_i][0]; //planeData[nPlanes].Vp[posData];
-            CVMResult[1]= dataPlaneOutput[posData+posVector_i][1]; //planeData[nPlanes].Vs[posData];
-            CVMResult[2]= dataPlaneOutput[posData+posVector_i][2]; //planeData[nPlanes].Ro[posData];
+            int posVector_i=FilesData[IniPosInitial+IndexZero];    //Position corresponding to the begining of each plane
+            CVMResult[0] = dataPlaneOutput[IniPosVp+(posData+posVector_i)];  //planeData[nPlanes].Vp[posData];
+            CVMResult[1] = dataPlaneOutput[IniPosVs+(posData+posVector_i)];  //planeData[nPlanes].Vs[posData];
+            CVMResult[2] = dataPlaneOutput[IniPosRho+(posData+posVector_i)]; //planeData[nPlanes].Ro[posData];
             //printf("Vp, %lf - Vs, %lf - Density, %lf \n", CVMResult[0], CVMResult[1], CVMResult[2]*1000);
-            
         }
         
         else if (IndexZeroX == -1 && IndexZeroY == -1) // Bilinear interp
         {
             double x=XcoorPoint+distXcornerc11;
             double y=YcoorPoint+distYcornerc11;
-            int posVector_i=FilesData[IndexZero][2];
-            int posVector_j=FilesData[IndexZero][3];
+            int posVector_i=FilesData[IniPosInitial+IndexZero];
+            int posVector_j=FilesData[IniPosFinal+IndexZero];
             float* dataPlaneVp = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneVs = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneRho = (float *)malloc(sizeof(float)*sizeplane);
@@ -440,9 +450,9 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             int j=0;
             for (i=posVector_i; i<posVector_j+1; i++)
             {
-                dataPlaneVp[j]=dataPlaneOutput[i][0];
-                dataPlaneVs[j]=dataPlaneOutput[i][1];
-                dataPlaneRho[j]=dataPlaneOutput[i][2];
+                dataPlaneVp[j]=dataPlaneOutput[IniPosVp+i];
+                dataPlaneVs[j]=dataPlaneOutput[IniPosVs+i];
+                dataPlaneRho[j]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 j=j+1;
             }
@@ -462,18 +472,20 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
         {
             double x=XcoorPoint+distXcornerc11;
             double y=YcoorPoint+distYcornerc11;
-            int posVector_i=FilesData[IndexZero][2];
-            int posVector_j=FilesData[IndexZero][3];
+            int posVector_i=FilesData[IniPosInitial+IndexZero];
+            int posVector_j=FilesData[IniPosFinal+IndexZero];
             float* dataPlaneVp = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneVs = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneRho = (float *)malloc(sizeof(float)*sizeplane);
+            //CVMPlane *planeData = malloc(sizeof(CVMPlane)*1);
             int i;
             int j=0;
             for (i=posVector_i; i<posVector_j+1; i++)
             {
-                dataPlaneVp[j]=dataPlaneOutput[i][0];
-                dataPlaneVs[j]=dataPlaneOutput[i][1];
-                dataPlaneRho[j]=dataPlaneOutput[i][2];
+                //planeData[j].Vp = dataPlaneOutput[i][0];
+                dataPlaneVp[j]=dataPlaneOutput[IniPosVp+i];
+                dataPlaneVs[j]=dataPlaneOutput[IniPosVs+i];
+                dataPlaneRho[j]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 j=j+1;
             }
@@ -494,8 +506,8 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
         {
             double x=XcoorPoint+distXcornerc11;
             double y=YcoorPoint+distYcornerc11;
-            int posVector_i=FilesData[IndexZero][2];
-            int posVector_j=FilesData[IndexZero][3];
+            int posVector_i=FilesData[IniPosInitial+IndexZero];
+            int posVector_j=FilesData[IniPosFinal+IndexZero];
             float* dataPlaneVp = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneVs = (float *)malloc(sizeof(float)*sizeplane);
             float* dataPlaneRho = (float *)malloc(sizeof(float)*sizeplane);
@@ -503,9 +515,9 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             int j=0;
             for (i=posVector_i; i<posVector_j+1; i++)
             {
-                dataPlaneVp[j]=dataPlaneOutput[i][0];
-                dataPlaneVs[j]=dataPlaneOutput[i][1];
-                dataPlaneRho[j]=dataPlaneOutput[i][2];
+                dataPlaneVp[j]=dataPlaneOutput[IniPosVp+i];
+                dataPlaneVs[j]=dataPlaneOutput[IniPosVs+i];
+                dataPlaneRho[j]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 j=j+1;
             }
@@ -573,10 +585,10 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             double x=XcoorPoint+distXcornerc11;
             double y=YcoorPoint+distYcornerc11;
             double z=DepthPoint;
-            int LowerPlanePosVector_i=FilesData[IndexClosestPos][2];
-            int LowerPlanePosVector_j=FilesData[IndexClosestPos][3];
-            int UpperPlanePosVector_i=FilesData[IndexClosestNeg][2];
-            int UpperPlanePosVector_j=FilesData[IndexClosestNeg][3];
+            int LowerPlanePosVector_i=FilesData[IniPosInitial+IndexClosestPos];
+            int LowerPlanePosVector_j=FilesData[IniPosFinal+IndexClosestPos];
+            int UpperPlanePosVector_i=FilesData[IniPosInitial+IndexClosestNeg];
+            int UpperPlanePosVector_j=FilesData[IniPosFinal+IndexClosestNeg];
             float* dataLowerPlaneVp = (float *)malloc(sizeof(float)*sizeplane);
             float* dataLowerPlaneVs = (float *)malloc(sizeof(float)*sizeplane);
             float* dataLowerPlaneRho = (float *)malloc(sizeof(float)*sizeplane);
@@ -588,17 +600,17 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             int k=0;
             for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
             {
-                dataLowerPlaneVp[j]=dataPlaneOutput[i][0];
-                dataLowerPlaneVs[j]=dataPlaneOutput[i][1];
-                dataLowerPlaneRho[j]=dataPlaneOutput[i][2];
+                dataLowerPlaneVp[j]=dataPlaneOutput[IniPosVp+i];
+                dataLowerPlaneVs[j]=dataPlaneOutput[IniPosVs+i];
+                dataLowerPlaneRho[j]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 j=j+1;
             }
             for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
             {
-                dataUpperPlaneVp[k]=dataPlaneOutput[i][0];
-                dataUpperPlaneVs[k]=dataPlaneOutput[i][1];
-                dataUpperPlaneRho[k]=dataPlaneOutput[i][2];
+                dataUpperPlaneVp[k]=dataPlaneOutput[IniPosVp+i];
+                dataUpperPlaneVs[k]=dataPlaneOutput[IniPosVs+i];
+                dataUpperPlaneRho[k]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 k=k+1;
             }
@@ -624,10 +636,10 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             double x=XcoorPoint+distXcornerc11;
             double y=YcoorPoint+distYcornerc11;
             double z=DepthPoint;
-            int LowerPlanePosVector_i=FilesData[IndexClosestPos][2];
-            int LowerPlanePosVector_j=FilesData[IndexClosestPos][3];
-            int UpperPlanePosVector_i=FilesData[IndexClosestNeg][2];
-            int UpperPlanePosVector_j=FilesData[IndexClosestNeg][3];
+            int LowerPlanePosVector_i=FilesData[IniPosInitial+IndexClosestPos];
+            int LowerPlanePosVector_j=FilesData[IniPosFinal+IndexClosestPos];
+            int UpperPlanePosVector_i=FilesData[IniPosInitial+IndexClosestNeg];
+            int UpperPlanePosVector_j=FilesData[IniPosFinal+IndexClosestNeg];
             float* dataLowerPlaneVp = (float *)malloc(sizeof(float)*sizeplane);
             float* dataLowerPlaneVs = (float *)malloc(sizeof(float)*sizeplane);
             float* dataLowerPlaneRho = (float *)malloc(sizeof(float)*sizeplane);
@@ -639,17 +651,17 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
             int k=0;
             for (i=LowerPlanePosVector_i; i<LowerPlanePosVector_j+1; i++)
             {
-                dataLowerPlaneVp[j]=dataPlaneOutput[i][0];
-                dataLowerPlaneVs[j]=dataPlaneOutput[i][1];
-                dataLowerPlaneRho[j]=dataPlaneOutput[i][2];
+                dataLowerPlaneVp[j]=dataPlaneOutput[IniPosVp+i];
+                dataLowerPlaneVs[j]=dataPlaneOutput[IniPosVs+i];
+                dataLowerPlaneRho[j]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 j=j+1;
             }
             for (i=UpperPlanePosVector_i; i<UpperPlanePosVector_j+1; i++)
             {
-                dataUpperPlaneVp[k]=dataPlaneOutput[i][0];
-                dataUpperPlaneVs[k]=dataPlaneOutput[i][1];
-                dataUpperPlaneRho[k]=dataPlaneOutput[i][2];
+                dataUpperPlaneVp[k]=dataPlaneOutput[IniPosVp+i];
+                dataUpperPlaneVs[k]=dataPlaneOutput[IniPosVs+i];
+                dataUpperPlaneRho[k]=dataPlaneOutput[IniPosRho+i];
                 //printf("%lf %lf %lf \n", dataPlaneVp[j], dataPlaneVs[j], dataPlaneRho[j]);
                 k=k+1;
             }
@@ -689,14 +701,14 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,double** Fil
     payload->rho=CVMResult[2]*1000; // density in kg/m3
     //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],CVMResult[0],CVMResult[1],CVMResult[2]*1000);
     //printf("%lf %lf %lf %.11lf %.11lf %lf %lf %lf %lf\n", XcoorPoint, XcoorPoint, DepthPoint, coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],payload->Vp,payload->Vs,payload->rho);
-    //printf("%lf %lf %lf %lf %lf %lf\n", XcoorPoint, XcoorPoint, DepthPoint ,payload->Vp,payload->Vs,payload->rho);
+    printf("%lf %lf %lf %lf %lf %lf\n", XcoorPoint, XcoorPoint, DepthPoint ,payload->Vp,payload->Vs,payload->rho);
     // Dealocate memory assigned to the structures
     free(xcoorvector);
     xcoorvector=NULL;
     free(ycoorvector);
     ycoorvector=NULL;
-    free(coordinatesVector);
-    coordinatesVector=NULL;
+    //free(coordinatesVector);
+    //coordinatesVector=NULL;
     if (CVMResult[0] == 0 || CVMResult[1] == 0 || CVMResult[2] == 0)
     {
         printf("%s\n", "CVM ERROR");
