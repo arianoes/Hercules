@@ -342,8 +342,8 @@ static struct Global_t {
 };
 
 // Global variables Bogota
-static double ** DataFilesBogota; //array that stores planes characteristics
-static float  ** PlanesBogota;    //array that stores all planes data (long lat elevation deth Vp Vs Rho)
+static double * DataFilesBogota; //array that stores planes characteristics
+static float  * PlanesBogota;    //array that stores all planes data (long lat elevation deth Vp Vs Rho)
 
 
 /* ------------------------------End of declarations------------------------------ */
