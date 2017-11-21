@@ -28,7 +28,7 @@ float* loadPlanesCVMBogota (void) {
         int CVMnameFileLen;
         fscanf(fileB,"%i",&CVMnameFileLen);
         InputPlanesName[i].namePlanesCVM=malloc(sizeof(char)*(CVMnameFileLen+1));
-        fscanf(fileB,"%s %lf %lf %lf %lf",InputPlanesName[i].namePlanesCVM,&InputPlanesName[i].IDplaneCVM,&InputPlanesName[i].DepthInputPlaneCVM,&InputPlanesName[i].PlaneInitialPositionCVM,&InputPlanesName[i].PlaneFinalPositionCVM);
+        fscanf(fileB,"%s %lf %lf",InputPlanesName[i].namePlanesCVM,&InputPlanesName[i].IDplaneCVM,&InputPlanesName[i].DepthInputPlaneCVM);
         //printf("%s\n",InputPlanesName[i].namePlanesCVM);
     }
     
@@ -44,7 +44,9 @@ float* loadPlanesCVMBogota (void) {
     for (j=0; j<NPlanesBogota;j++)
     {
         FILE *fileC = fopen(InputPlanesName[j].namePlanesCVM,"r");
-        //printf("%s\n",InputPlanesName[j].namePlanesCVM);
+        if (fileC == NULL){
+        printf("Error reading file: %s\n",InputPlanesName[j].namePlanesCVM);
+        }
         for (k=0; k<sizeplane;k++)
         {
             int posFile = k + (sizeplane * j);
