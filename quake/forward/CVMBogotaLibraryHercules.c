@@ -635,8 +635,7 @@ int CVMBogota(double XcoorPoint,double YcoorPoint,double DepthPoint,PlanesFilesD
     payload->rho=CVMResult[2]*1000; // density in kg/m3
     //printf("%.11lf %.11lf %lf %lf %lf %lf\n", coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],CVMResult[0],CVMResult[1],CVMResult[2]*1000);
     //printf("%lf %lf %lf %.11lf %.11lf %lf %lf %lf %lf\n", XcoorPoint, XcoorPoint, DepthPoint, coordinatesVector[0], coordinatesVector[1], coordinatesVector[2],payload->Vp,payload->Vs,payload->rho);
-    printf("%lf %lf %lf %lf %lf %lf\n", XcoorPoint, YcoorPoint, DepthPoint ,payload->Vp,payload->Vs,payload->rho);
-    
+    //printf("%lf %lf %lf %lf %lf %lf\n", XcoorPoint, YcoorPoint, DepthPoint ,payload->Vp,payload->Vs,payload->rho);
 
     if (CVMResult[0] == 0 || CVMResult[1] == 0 || CVMResult[2] == 0)
     {

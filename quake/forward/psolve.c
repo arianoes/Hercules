@@ -7727,6 +7727,8 @@ int main( int argc, char** argv )
 
     /* Generate, partition and output unstructured octree mesh */
     mesh_generate();
+    /* Dealocate memory allocated to global static variables Bogota */
+    free(PlanesBogota);
 
     if ( Param.includeBuildings == YES ){
         if ( get_fixedbase_flag() == YES ) {
@@ -7879,14 +7881,6 @@ int main( int argc, char** argv )
         planes_close(Global.myID, Param.IO_pool_pe_count, Param.theNumberOfPlanes);
     }
     IO_PES_REJOIN:
-    
-    
-    /* Dealocate memory allocated to global static variables Bogota */
-    free(DataFilesBogota);
-    DataFilesBogota=NULL;
-    free(PlanesBogota);
-    PlanesBogota=NULL;
-
 
     MPI_Finalize();
 
