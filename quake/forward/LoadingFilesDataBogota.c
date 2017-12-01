@@ -11,7 +11,7 @@
 
 int loadFilesData (PlanesFilesData *filesData) {
 
-    FILE *fileA = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesName.in", "r");
+    FILE *fileA = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
     
     int i;
     int j;
