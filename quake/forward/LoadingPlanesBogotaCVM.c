@@ -1,18 +1,9 @@
-//
-//  LoadingPlanesBogotaCVM.c
-//  CVMBogotaH
-//
-//  Created by Andrea camila Riaño escandon  on 11/15/17.
-//  Copyright © 2017 Andrea camila Riaño escandon . All rights reserved.
-//
-
 #include "LoadingPlanesBogotaCVM.h"
 
 
 float* loadPlanesCVMBogota (void) {
     
-    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
-    
+    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesName.in", "r");
     int i;
     int j;
     int k;
@@ -35,25 +26,23 @@ float* loadPlanesCVMBogota (void) {
     fclose (fileB);
     
     // Load data from planes files in a single structure
-    CVMPlane *planeData = malloc(sizeof(CVMPlane)*sizeplane*NPlanesBogota);
-    //printf("%lu\n",sizeof(CVMPlane)*sizeplane*NPlanesBogota); // 8 bytes * 7 properties * NPlanes planes * sizeplane data/property --> debug chekpoint
-    //printf("%lu\n",sizeof(float*));
-    //printf("%lu\n",sizeof(float));
-    //printf("%lu\n",NPlanesBogota*sizeplane*sizeof(float)*3*sizeof(float));
+    CVMPlane * planeData = malloc(sizeof(CVMPlane)*sizeplane*NPlanesBogota);
     
     for (j=0; j<NPlanesBogota;j++)
     {
         FILE *fileC = fopen(InputPlanesName[j].namePlanesCVM,"r");
         if (fileC == NULL){
-        printf("Error reading file: %s\n",InputPlanesName[j].namePlanesCVM);
+            printf("Error reading file: %s\n",InputPlanesName[j].namePlanesCVM);
         }
         for (k=0; k<sizeplane;k++)
         {
             int posFile = k + (sizeplane * j);
-            fscanf(fileC,"%f %f %f\n", &planeData[posFile].Vp, &planeData[posFile].Vs, &planeData[posFile].Ro);
+            fscanf(fileC,"%f %f %f\n", &planeData[posFile].Vp, &planeData[posFile].Vs, &planeData[posFile].rho);
+            //printf("%f %f %f\n", planeData[posFile].Vp, planeData[posFile].Vs, planeData[posFile].rho);
         }
         fclose(fileC);
     }
+    
     
     float *outputArray;
     int rows = NPlanesBogota*sizeplane;
@@ -75,7 +64,7 @@ float* loadPlanesCVMBogota (void) {
                 //initial position = rows; final position = (2*rows) - 1
             }
             if (l==2){
-                outputArray[offset]=planeData[o].Ro;
+                outputArray[offset]=planeData[o].rho;
                 //initial position = (2*rows); final position = (3*rows) - 1
             }
             
@@ -94,9 +83,7 @@ float* loadPlanesCVMBogota (void) {
         free(InputPlanesName[i].namePlanesCVM);
     }
     free(InputPlanesName);
-    InputPlanesName=NULL;
     free(planeData);
-    planeData =NULL;
-    
+
     return outputArray;
 }

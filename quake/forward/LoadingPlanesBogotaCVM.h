@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define sizeplane     125751
-#define NPlanesBogota 64
+#define sizeplane     330418
+#define NPlanesBogota 82
 
 typedef struct
 {
@@ -28,14 +28,12 @@ typedef struct
 
 typedef struct
 {
-// This structure stores the values of the CVM for each plane Size = 8 bytes * 7 parameters * sizeplane * number of planes
     float Vp;
     float Vs;
-    float Ro;
+    float rho;
 } CVMPlane;
 
-
 // Function prototype
-float* loadPlanesCVMBogota (void);
+float *loadPlanesCVMBogota (void);
 
 #endif /* LoadingPlanesBogotaCVM_h */

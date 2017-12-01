@@ -341,11 +341,9 @@ static struct Global_t {
     .theCVMRecordSize = sizeof(cvmrecord_t)
 };
 
-// Global variables Bogota
-static double * DataFilesBogota; //array that stores planes characteristics
-static float  * PlanesBogota;    //array that stores all planes data (long lat elevation deth Vp Vs Rho)
-
-
+// Global variables Bogota 
+PlanesFilesData files_props;  //structure that stores planes characteristics
+static float  *PlanesBogota; //array that stores all planes data (long lat elevation deth Vp Vs Rho)
 /* ------------------------------End of declarations------------------------------ */
 
 static inline int
@@ -1409,7 +1407,7 @@ setrec( octant_t* leaf, double ticksize, void* data )
                     z_m -= get_surface_shift();
 		}
 
-		res = CVMBogota( y_m, x_m, z_m, DataFilesBogota, PlanesBogota, &g_props );
+		res = CVMBogota( y_m, x_m, z_m,files_props,PlanesBogota,&g_props );
 
 		if (res != 0) {
 		    continue;
@@ -7464,7 +7462,7 @@ mesh_correct_properties( etree_t* cvm )
             		}
 
                     res = CVMBogota(east_m, north_m,
-                                    depth_m, DataFilesBogota, PlanesBogota, &g_props );
+                                    depth_m,files_props,PlanesBogota,&g_props);
 
                     if (res != 0) {
                         fprintf(stderr, "Cannot find the query point: east = %lf, north = %lf, depth = %lf \n",
@@ -7695,7 +7693,9 @@ int main( int argc, char** argv )
     read_parameters(argc, argv);
 
     /* Read bogota database from file */
-    DataFilesBogota=loadFilesData();
+    /*load planes characterisitics (ID Depth initialRow finalRow) from a file */
+    loadFilesData(&files_props);
+    /*load plane data (long lat elevation deth Vp Vs Rho) from a file */
     PlanesBogota=loadPlanesCVMBogota();
 
     /* Create and open database */
