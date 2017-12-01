@@ -32,14 +32,6 @@ typedef struct
     double FinalPos[NPlanesBogota];
 } PlanesFilesData;
 
-typedef struct
-{
-    float Vp[sizeplane][NPlanesBogota];
-    float Vs[sizeplane][NPlanesBogota];
-    float rho[sizeplane][NPlanesBogota];
-} Planes;
-
-
 // Function prototype
 int loadFilesData (PlanesFilesData *filesData);
 
