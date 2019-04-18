@@ -4498,7 +4498,7 @@ static void solver_run()
         solver_update_status( step, startingStep );
         // Todo Dorian. Ask Ricardo about this file (disp.out), it gets really big at high frequencies, and it is not clear its purpose.
         //solver_output_wavefield( step );
-        solver_output_planes( Global.mySolver, Global.myID, step );
+        solver_output_planes( Global.mySolver, Global.myID, step );
         solver_output_stations( step );
         solver_output_drm_nodes( Global.mySolver, step, Param.theTotalSteps );
         solver_read_source_forces( step, Param.theDeltaT );
