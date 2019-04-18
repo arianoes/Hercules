@@ -59,6 +59,9 @@
 #include "meshformatlab.h"
 #include "topography.h"
 #include "drm_planewaves.h"
+#include "LoadingFilesDataBogota.h"
+#include "LoadingPlanesBogotaCVM.h"
+#include "CVMBogotaLibraryHercules.h"
 
 /* ONLY GLOBAL VARIABLES ALLOWED OUTSIDE OF PARAM. and GLOBAL. IN ALL OF PSOLVE!! */
 MPI_Comm comm_solver;
@@ -338,6 +341,10 @@ static struct Global_t {
     .fpsource = NULL,
     .theCVMRecordSize = sizeof(cvmrecord_t)
 };
+
+// Global variables Bogota 
+PlanesFilesData files_props; //structure that stores planes characteristics
+static float  *PlanesBogota; //array that stores all planes data (long lat elevation deth Vp Vs Rho)
 
 /* ------------------------------End of declarations------------------------------ */
 
@@ -1420,7 +1427,8 @@ setrec( octant_t* leaf, double ticksize, void* data )
                     z_m -= get_surface_shift();
 		}
 
-		res = cvm_query( Global.theCVMEp, y_m, x_m, z_m, &g_props );
+		//res = cvm_query( Global.theCVMEp, y_m, x_m, z_m, &g_props );
+		res = CVMBogota( y_m, x_m, z_m,files_props,PlanesBogota,&g_props );
 
 		if (res != 0) {
 		    continue;
@@ -7785,8 +7793,14 @@ int main( int argc, char** argv )
     /* Read input parameters from file */
     read_parameters(argc, argv);
 
+    /* Read bogota database from file */
+    /*load planes characterisitics (ID Depth initialRow finalRow) from a file */
+    loadFilesData(&files_props);
+    /*load plane data (long lat elevation deth Vp Vs Rho) from a file */
+    PlanesBogota=loadPlanesCVMBogota();
+
     /* Create and open database */
-    open_cvmdb();
+    //open_cvmdb();
 
     /* Initialize nonlinear parameters */
     if ( Param.includeNonlinearAnalysis == YES ) {
@@ -7826,6 +7840,9 @@ int main( int argc, char** argv )
 
     /* Generate, partition and output unstructured octree mesh */
     mesh_generate();
+
+    /* Dealocate memory allocated to global static variables Bogota */
+    free(PlanesBogota);
 
     if ( Param.includeBuildings == YES ){
         if ( get_fixedbase_flag() == YES ) {
