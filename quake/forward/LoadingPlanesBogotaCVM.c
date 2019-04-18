@@ -3,7 +3,10 @@
 
 float* loadPlanesCVMBogota (void) {
     
-    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
+    FILE *fileB = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHerculesTitan.in", "r");
+    if (fileB == NULL){
+        printf("Error in file opening in function loadPlanesCVMBogota\n");
+    }
     int i;
     int j;
     int k;

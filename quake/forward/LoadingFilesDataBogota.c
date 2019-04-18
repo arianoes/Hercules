@@ -11,8 +11,10 @@
 
 int loadFilesData (PlanesFilesData *filesData) {
 
-    FILE *fileA = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHercules.in", "r");
-    
+    FILE *fileA = fopen("/u/sciteam/rianoesc/bogotadatabase/FilesPlanesNameHerculesTitan.in", "r");
+    if (fileA == NULL){
+        printf("Error in file opening in function loadFilesDataBogota\n");
+    }
     int i;
     int j;
 
