@@ -21,7 +21,7 @@
  * quakesource.h: source definition of earthquakes used in a generic finite
  *                element code.
  *
-
+ 
  * Copyright (c) 2005 Leonardo Ramirez-Guzman
  *
  * All rights reserved.  May not be used without permission, modified, or
@@ -46,22 +46,22 @@
 
 
 typedef struct numerics_info_t{
-
-  int32_t numberoftimesteps;
-
-  double deltat,validfrequency;
-
-  double minimumh;
-
-  double xlength,ylength,zlength;
-
+    
+    int32_t numberoftimesteps;
+    
+    double deltat,validfrequency, endT, startT;
+    
+    double minimumh;
+    
+    double xlength,ylength,zlength;
+    
 }numerics_info_t;
 
 
 typedef struct mpi_info_t{
-
-  int32_t myid,groupsize;
-
+    
+    int32_t myid,groupsize;
+    
 }mpi_info_t;
 
 
@@ -81,59 +81,59 @@ typedef struct mpi_info_t{
 
 
 typedef enum {
-
-  RAMP = 0, SINE, QUADRATIC, RICKER, EXPONENTIAL, DISCRETE
-
+    
+    RAMP = 0, SINE, QUADRATIC, RICKER, EXPONENTIAL, DISCRETE
+    
 } source_function_t;
 
 
 
 typedef enum {
-
-  POINT = 0, PLANE, SRFH, PLANEWITHKINKS
-
+    
+    POINT = 0, PLANE, SRFH, PLANEWITHKINKS
+    
 } source_type_t;
 
 
 
 typedef struct ptsrc_t {
-
-  source_function_t sourceFunctionType;
-
-  int32_t lnid[8];
-
-  vector3D_t localCoords;  /*Local Coords in the plane to be mapped used only
-                             for terashake type earthquakes */
-
-  vector3D_t globalCoords;
-
-  vector3D_t domainCoords;
-
-  double x, y, z;                   /* Local coordinate inside an element */
-
-  double strike, dip, rake;
-
-  double delayTime, T0,Ts,Tp;
-
-  double mu, area, maxSlip, muArea;
-
-  double edgesize;                  /* Edge size of the containing element */
-
-  double nodalForce[8][3];          /* nodal forces on the containing elem */
-
-  double *displacement;              /* Displacement vector time dependant  */
-
-  double dt,numberOfTimeSteps;
-
-  double M0;
-
-  double tinit, dtfunction ;
-
-  double *slipfundiscrete;
-
-  int nt1;
-
-
+    
+    source_function_t sourceFunctionType;
+    
+    int32_t lnid[8];
+    
+    vector3D_t localCoords;  /*Local Coords in the plane to be mapped used only
+                              for terashake type earthquakes */
+    
+    vector3D_t globalCoords;
+    
+    vector3D_t domainCoords;
+    
+    double x, y, z;                   /* Local coordinate inside an element */
+    
+    double strike, dip, rake;
+    
+    double delayTime, T0,Ts,Tp;
+    
+    double mu, area, maxSlip, muArea;
+    
+    double edgesize;                  /* Edge size of the containing element */
+    
+    double nodalForce[8][3];          /* nodal forces on the containing elem */
+    
+    double *displacement;              /* Displacement vector time dependant  */
+    
+    double dt,numberOfTimeSteps;
+    
+    double M0;
+    
+    double tinit, dtfunction ;
+    
+    double *slipfundiscrete;
+    
+    int nt1;
+    
+    
 } ptsrc_t;
 
 
@@ -163,7 +163,7 @@ void compute_source_function ( ptsrc_t *pointSource );
  *
  */
 double compute_initial_time(vector3D_t station, vector3D_t hypocenter,
-			    double rupturevelocity );
+                            double rupturevelocity );
 
 
 /* compute_local_coords: computes the coordinates of a station in the fault
@@ -177,7 +177,7 @@ double compute_initial_time(vector3D_t station, vector3D_t hypocenter,
  *
  */
 vector3D_t compute_local_coords(int32_t point, int32_t totalNodes,
-				double *gridx, double *gridy );
+                                double *gridx, double *gridy );
 
 
 /*
@@ -185,7 +185,7 @@ vector3D_t compute_local_coords(int32_t point, int32_t totalNodes,
  *
  */
 int PrintFilterSignal( int signalsize, double samplingfrequency,
-		       double thresholdfrequency,  int m);
+                      double thresholdfrequency,  int m);
 
 
 
@@ -196,8 +196,8 @@ int PrintFilterSignal( int signalsize, double samplingfrequency,
  */
 
 int FilterSignal ( double *signal, int signalsize,
-		   double samplingfrequency, double thresholdfrequency,
-		   int m );
+                  double samplingfrequency, double thresholdfrequency,
+                  int m );
 
 
 
@@ -219,9 +219,9 @@ int FilterSignal ( double *signal, int signalsize,
  *
  */
 int compute_print_source (const char *physicsin, octree_t *myoctree,
-			  mesh_t *mymesh, numerics_info_t numericsinformation,
-			  mpi_info_t mpiinformation, double globalDelayT,
-			  double surfaceShift );
+                          mesh_t *mymesh, numerics_info_t numericsinformation,
+                          mpi_info_t mpiinformation, double globalDelayT,
+                          double surfaceShift );
 
 
 void update_forceinprocessor(int32_t iForce, char *inoutprocessor, int onoff);
@@ -229,3 +229,6 @@ void update_forceinprocessor(int32_t iForce, char *inoutprocessor, int onoff);
 FILE* source_open_forces_file( const char* flags );
 
 int source_get_local_loaded_nodes_count();
+
+double get_srfhdt();
+
