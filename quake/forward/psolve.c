@@ -3781,22 +3781,66 @@ static void solver_delete()
     free(Global.mySolver);
 }
 
+
 static int
-read_myForces( int32_t timestep )
+read_myForces( int32_t timestep, double dt )
 {
     off_t   whereToRead;
     size_t  to_read, read_count;
-
+    int interval, i;
+    
+    double source_dt = get_srfhdt();
+    double T         = dt * timestep;
+    
+    vector3D_t* aux1 = calloc( Global.theNodesLoaded, sizeof(vector3D_t) );
+    vector3D_t* aux2 = calloc( Global.theNodesLoaded, sizeof(vector3D_t) );
+    
+    if ( aux1 == NULL || aux2 == NULL) {
+        solver_abort( "read_myforces", "memory allocation failed",
+                     "Cannot allocate memory for Global.myForces interpolation \n" );
+    }
+    
+    interval = floor(T/source_dt);
+    
+    /* read first interval */
     whereToRead = ((off_t)sizeof(int32_t))
-		+ Global.theNodesLoaded * sizeof(int32_t)
-		+ Global.theNodesLoaded * timestep * sizeof(double) * 3;
-
+    + Global.theNodesLoaded * sizeof(int32_t)
+    + Global.theNodesLoaded * interval * sizeof(double) * 3;
+    
     hu_fseeko( Global.fpsource, whereToRead, SEEK_SET );
-
+    
     to_read    = Global.theNodesLoaded * 3;
-    read_count = hu_fread( Global.myForces, sizeof(double), to_read, Global.fpsource );
-
-    return 0;	/* if we got here everything went OK */
+    read_count = hu_fread( aux1, sizeof(double), to_read, Global.fpsource );
+    
+    /* read second interval */
+    /*whereToRead = ((off_t)sizeof(int32_t))
+     + Global.theNodesLoaded * sizeof(int32_t)
+     + Global.theNodesLoaded * ( interval + 1 ) * sizeof(double) * 3;
+     
+     hu_fseeko( Global.fpsource, whereToRead, SEEK_SET ); */
+    
+    read_count = hu_fread( aux2, sizeof(double), to_read, Global.fpsource );
+    
+    for (i = 0; i <  Global.theNodesLoaded; i++) {
+        Global.myForces [ i ].x [0] = aux1[ i ].x [0] + ( aux2[ i ].x [0] - aux1[ i ].x [0] )/source_dt*( T - interval * source_dt);
+        Global.myForces [ i ].x [1] = aux1[ i ].x [1] + ( aux2[ i ].x [1] - aux1[ i ].x [1] )/source_dt*( T - interval * source_dt);
+        Global.myForces [ i ].x [2] = aux1[ i ].x [2] + ( aux2[ i ].x [2] - aux1[ i ].x [2] )/source_dt*( T - interval * source_dt);
+    }
+    
+    free(aux1);
+    free(aux2);
+    
+    /*
+     whereToRead = ((off_t)sizeof(int32_t))
+     + Global.theNodesLoaded * sizeof(int32_t)
+     + Global.theNodesLoaded * timestep * sizeof(double) * 3;
+     
+     hu_fseeko( Global.fpsource, whereToRead, SEEK_SET );
+     
+     to_read    = Global.theNodesLoaded * 3;
+     read_count = hu_fread( Global.myForces, sizeof(double), to_read, Global.fpsource ); */
+    
+    return 0;    /* if we got here everything went OK */
 }
 
 
@@ -4060,11 +4104,11 @@ static void solver_nonlinear_state( mysolver_t *solver,
 }
 
 
-static void solver_read_source_forces( int step )
+static void solver_read_source_forces( int step, double dt )
 {
     Timer_Start( "Read My Forces" );
     if (Global.theNodesLoaded > 0) {
-        read_myForces( step );
+        read_myForces( step, dt );
     }
     Timer_Stop( "Read My Forces" );
 }
@@ -4454,10 +4498,10 @@ static void solver_run()
         solver_update_status( step, startingStep );
         // Todo Dorian. Ask Ricardo about this file (disp.out), it gets really big at high frequencies, and it is not clear its purpose.
         //solver_output_wavefield( step );
-        solver_output_planes( Global.mySolver, Global.myID, step );
+        solver_output_planes( Global.mySolver, Global.myID, step );
         solver_output_stations( step );
         solver_output_drm_nodes( Global.mySolver, step, Param.theTotalSteps );
-        solver_read_source_forces( step );
+        solver_read_source_forces( step, Param.theDeltaT );
         solver_read_drm_displacements( step , Param.theDeltaT ,Param.theTotalSteps );
         Timer_Stop( "Solver I/O" );
 
@@ -6467,6 +6511,8 @@ source_init( const char* physicsin )
 		Global.theNumericsInformation.numberoftimesteps = Param.theTotalSteps;
 		Global.theNumericsInformation.deltat	     = Param.theDeltaT;
 		Global.theNumericsInformation.validfrequency    = Param.theFreq;
+        Global.theNumericsInformation.endT              = Param.theEndT;
+        Global.theNumericsInformation.startT            = Param.theStartT;
 
 		Global.theNumericsInformation.xlength = Param.theDomainX;
 		Global.theNumericsInformation.ylength = Param.theDomainY;
