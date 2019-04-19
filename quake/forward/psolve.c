@@ -2250,7 +2250,7 @@ mesh_generate()
 
 #ifdef USECVMDB
     /* Close the material database */
-    etree_close(Global.theCVMEp);
+    //etree_close(Global.theCVMEp);
 #else
     free(Global.theCVMRecord);
 #endif /* USECVMDB */
@@ -7548,8 +7548,8 @@ mesh_correct_properties( etree_t* cvm )
 
             		}
 
-                    res = cvm_query( Global.theCVMEp, east_m, north_m,
-                                     depth_m, &g_props );
+                    //res = cvm_query( Global.theCVMEp, east_m, north_m, depth_m, &g_props );
+                    res = CVMBogota(east_m, north_m,depth_m,files_props,PlanesBogota,&g_props);
 
                     if (res != 0) {
                         fprintf(stderr, "Cannot find the query point: east = %lf, north = %lf, depth = %lf \n",
@@ -7568,8 +7568,8 @@ mesh_correct_properties( etree_t* cvm )
 
         				for (k = 0; k < nlayers; k++) {
         					depth_k = depth_o * (k + 0.5);
-        					res = cvm_query( Global.theCVMEp, east_m, north_m,
-        							depth_k, &g_props );
+        					//res = cvm_query( Global.theCVMEp, east_m, north_m, depth_k, &g_props );
+                            res = CVMBogota(east_m, north_m,depth_k,files_props,PlanesBogota,&g_props);
         					s_0 += depth_o * (g_props.rho - 1000 ) * 9.81 * (1 + 2*0.5)/3;
 
         				}
